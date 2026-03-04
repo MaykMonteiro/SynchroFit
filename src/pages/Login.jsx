@@ -3,14 +3,15 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext.jsx";
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, authLoading } = useAuth();
   const nav = useNavigate();
+
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
 
-  function onSubmit(e) {
+  async function onSubmit(e) {
     e.preventDefault();
-    login(email, senha);
+    await login(email, senha);
     nav("/dashboard");
   }
 
@@ -41,10 +42,11 @@ export default function Login() {
         </label>
 
         <button
-          className="w-full h-7 rounded bg-sf-greenDark text-white text-[12px] shadow-soft"
+          disabled={authLoading}
+          className="w-full h-7 rounded bg-sf-greenDark text-white text-[12px] shadow-soft disabled:opacity-60"
           type="submit"
         >
-          ENTRAR
+          {authLoading ? "ENTRANDO..." : "ENTRAR"}
         </button>
 
         <div className="text-center text-[11px] opacity-90">

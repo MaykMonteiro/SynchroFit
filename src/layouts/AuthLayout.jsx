@@ -6,7 +6,7 @@ export default function AuthLayout() {
     <div className="min-h-screen w-full flex">
       <div className="flex-1 bg-sf-panel flex items-center justify-center">
         <div className="text-white/80 font-serif text-6xl tracking-wide drop-shadow">
-          GYMTRACK
+          SYNCHRO FIT
         </div>
       </div>
 
