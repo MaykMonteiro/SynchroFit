@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from "
 import { api } from "../services/api";
 
 const PatientsContext = createContext(null);
+const PATIENTS_ENDPOINT = "/educators/patients";
 
 export function PatientsProvider({ children }) {
   const [patients, setPatients] = useState([]);
@@ -10,7 +11,7 @@ export function PatientsProvider({ children }) {
   async function fetchPatients() {
     setLoading(true);
     try {
-      const { data } = await api.get("/educators/patients");
+      const { data } = await api.get(PATIENTS_ENDPOINT);
       setPatients(data.data ?? data); // caso venha {data: [...]}
     } catch (error) {
       console.error("Erro ao buscar pacientes:", error);
@@ -22,7 +23,7 @@ export function PatientsProvider({ children }) {
 
   async function createPatient(payload) {
     try {
-      const { data } = await api.post("/educators/patients", payload);
+      const { data } = await api.post(PATIENTS_ENDPOINT, payload);
       const created = data.data ?? data;
       setPatients((prev) => [created, ...prev]);
       return created;
@@ -32,10 +33,40 @@ export function PatientsProvider({ children }) {
     }
   }
 
+  async function updatePatient(id, payload) {
+    const resolvedId = id ?? payload?.id ?? payload?.patient_id;
+    if (resolvedId === null || resolvedId === undefined) {
+      throw new Error("ID do paciente ausente para atualização.");
+    }
+
+    try {
+      const { data } = await api.patch(`${PATIENTS_ENDPOINT}/${resolvedId}`, payload);
+      const updated = data.data ?? data;
+
+      setPatients((prev) =>
+        prev.map((p) =>
+          String(p.id ?? p.patient_id) === String(resolvedId)
+            ? { ...p, ...updated }
+            : p
+        )
+      );
+
+      return updated;
+    } catch (error) {
+      console.log("PATCH status:", error?.response?.status);
+      console.log("PATCH data:", JSON.stringify(error?.response?.data, null, 2));
+      console.log("PATCH payload:", payload);
+      console.error("Erro ao atualizar paciente:", error?.response?.data ?? error);
+      throw error;
+    }
+  }
+
   async function deletePatient(id) {
     try {
-      await api.delete(`/educators/patients/${id}`);
-      setPatients((prev) => prev.filter((p) => p.id !== id));
+      await api.delete(`${PATIENTS_ENDPOINT}/${id}`);
+      setPatients((prev) =>
+        prev.filter((p) => String(p.id ?? p.patient_id) !== String(id))
+      );
     } catch (error) {
       console.error("Erro ao deletar paciente:", error);
       throw error;
@@ -52,6 +83,7 @@ export function PatientsProvider({ children }) {
       loading,
       fetchPatients,
       createPatient,
+      updatePatient,
       deletePatient,
     }),
     [patients, loading]

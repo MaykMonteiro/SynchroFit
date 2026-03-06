@@ -10,6 +10,7 @@ import Register from "./pages/Register.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Patients from "./pages/Patients.jsx";
 import PatientCreate from "./pages/PatientCreate.jsx";
+import PatientEdit from "./pages/PatientEdit.jsx";
 
 function PrivateRoute({ children }) {
   const { user } = useAuth();
@@ -35,6 +36,7 @@ export default function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/pacientes" element={<Patients />} />
         <Route path="/pacientes/cadastro" element={<PatientCreate />} />
+        <Route path="/pacientes/:id/editar" element={<PatientEdit />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
