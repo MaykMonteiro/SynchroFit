@@ -38,7 +38,7 @@ export default function Patients() {
     });
   };
 
-  const columns = ["NOME", "E-MAIL", "TELEFONE", "PLANO", "INICIO ACOMP.", "FIM ACOMP.", "ACOES"];
+  const columns = ["NOME", "E-MAIL", "TELEFONE", "PLANO", "INICIO ACOMP.", "FIM ACOMP.", "AÇÕES"];
 
   const rows = (patients ?? [])
     .filter((p) => (p.is_active ?? p.ativo ?? 1) == 1)
@@ -57,7 +57,7 @@ export default function Patients() {
           <button
             type="button"
             onClick={() => nav(`/pacientes/${patientId}/editar`)}
-            className="text-sf-green underline"
+            className="text-sf-green border border-green-600 px-2 py-[2px] rounded"
           >
             Editar
           </button>
@@ -74,14 +74,14 @@ export default function Patients() {
 
   return (
     <div>
-      <h1 className="text-center font-serif text-2xl uppercase tracking-wide mb-4">
+      <h1 className="text-center font-serif text-4xl uppercase tracking-wide mb-4">
         Pacientes
       </h1>
 
       <div className="mb-3">
         <button
           onClick={() => nav("/pacientes/cadastro")}
-          className="bg-sf-green text-white px-6 py-1 text-[12px] rounded shadow-soft"
+          className="bg-sf-greenDark text-white px-6 py-1 text-sm rounded-xl"
         >
           CADASTRE
         </button>

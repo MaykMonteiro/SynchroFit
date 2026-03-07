@@ -6,8 +6,8 @@ const Item = ({ to, children }) => (
     to={to}
     className={({ isActive }) =>
       [
-        "block px-4 py-2 text-[12px] uppercase tracking-wide border-b border-black/10",
-        isActive ? "bg-white/20" : "hover:bg-white/10",
+        "block px-4 py-2 text-md text-center uppercase tracking-wide border-b border-black/10",
+        isActive ? "border border-sf-textWhite" : "hover:bg-white",
       ].join(" ")
     }
   >
@@ -17,9 +17,9 @@ const Item = ({ to, children }) => (
 
 export default function Sidebar() {
   return (
-    <aside className="w-[190px] bg-sf-green text-sf-ink">
-      <div className="px-4 py-3 border-b border-black/10">
-        <div className="text-[12px] font-serif uppercase">Menu</div>
+    <aside className="w-[190px] bg-sf-green text-sf-textBlack">
+      <div className="px-4 py-3 text-center mt-5 mb-16">
+        <div className="text-lg font-serif uppercase">Menu</div>
       </div>
 
       <nav className="py-2">

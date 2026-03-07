@@ -105,20 +105,20 @@ export default function PatientEdit() {
 
   return (
     <div>
-      <h1 className="text-center font-serif text-2xl uppercase tracking-wide mb-4">
+      <h1 className="text-center font-serif text-4xl uppercase tracking-wide mb-8">
         Edição de Paciente
       </h1>
 
       <div className="bg-sf-panel rounded-md shadow-soft p-6">
         {error ? (
-          <div className="mb-3 text-[12px] p-2 rounded bg-red-100 text-red-700">
+          <div className="mb-3 text-base p-2 rounded bg-red-100 text-red-700">
             {error}
           </div>
         ) : null}
 
         <form onSubmit={salvar} className="space-y-4">
           <div>
-            <label className="text-[12px] italic">Nome</label>
+            <label className="text-base font-serif">Nome</label>
             <input
               className="w-full h-7 rounded px-2 text-[12px]"
               value={form.nome}
@@ -127,7 +127,7 @@ export default function PatientEdit() {
           </div>
 
           <div>
-            <label className="text-[12px] italic">E-mail</label>
+            <label className="text-base font-serif">E-mail</label>
             <input
               className="w-full h-7 rounded px-2 text-[12px]"
               value={form.email}
@@ -137,7 +137,7 @@ export default function PatientEdit() {
 
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="text-[12px] italic">Nascimento</label>
+              <label className="text-base font-serif">Nascimento</label>
               <input
                 type="date"
                 className="w-full h-7 rounded px-2 text-[12px]"
@@ -147,9 +147,9 @@ export default function PatientEdit() {
             </div>
 
             <div>
-              <label className="text-[12px] italic">Sexo</label>
+              <label className="text-base font-serif">Sexo</label>
               <select
-                className="w-full h-7 rounded px-2 text-[12px]"
+                className="w-full h-7 bg-white rounded px-2 text-base"
                 value={form.sexo}
                 onChange={(e) => setField("sexo", e.target.value)}
               >
@@ -161,9 +161,9 @@ export default function PatientEdit() {
             </div>
 
             <div>
-              <label className="text-[12px] italic">Telefone</label>
+              <label className="text-base font-serif">Telefone</label>
               <input
-                className="w-full h-7 rounded px-2 text-[12px]"
+                className="w-full h-7 rounded px-2 text-base"
                 value={form.telefone}
                 onChange={(e) => setField("telefone", e.target.value)}
               />
@@ -171,16 +171,16 @@ export default function PatientEdit() {
           </div>
 
           <div>
-            <label className="text-[12px] italic">Alergias</label>
+            <label className="text-base font-serif">Alergias</label>
             <textarea
-              className="w-full rounded px-2 py-2 text-[12px]"
+              className="w-full rounded px-2 py-2 text-base"
               value={form.alergias}
               onChange={(e) => setField("alergias", e.target.value)}
             />
           </div>
 
           <div className="flex items-center gap-3">
-            <label className="text-[12px]">Inativo / Ativo</label>
+            <label className="text-base font-serif">Inativo / Ativo</label>
             <input
               type="checkbox"
               checked={form.ativo}
@@ -192,7 +192,7 @@ export default function PatientEdit() {
             <button
               type="button"
               onClick={() => nav("/pacientes")}
-              className="border border-sf-green text-sf-green px-6 py-1 text-[12px] rounded"
+              className="w-80 border border-sf-green text-sf-greenDark px-6 py-1 text-lg rounded"
               disabled={saving}
             >
               Cancelar
@@ -200,7 +200,7 @@ export default function PatientEdit() {
 
             <button
               type="submit"
-              className="bg-sf-green text-white px-6 py-1 text-[12px] rounded shadow-soft disabled:opacity-60"
+              className="w-80 bg-sf-green text-white px-6 py-1 text-lg rounded hover:bg-sf-btnBlue disabled:opacity-60"
               disabled={saving}
             >
               {saving ? "Salvando..." : "Salvar"}

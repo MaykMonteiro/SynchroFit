@@ -5,11 +5,16 @@ export default {
     extend: {
       colors: {
         sf: {
-          green: "#6DBE7B",
-          greenDark: "#2E9E4F",
+          green: "#28A74573",
+          greenDark: "#28A745B3",
           panel: "#E6E6E6",
           page: "#FFFFFF",
           ink: "#1a1a1a",
+          btnBlue: "#008CFF",
+          textWhite: "#FFFFFF",
+          textBlack: "#000000",
+          bgGray: "#D8D8D8",
+          bgGrayLight: "#D8D8D8A1",
         },
       },
       fontFamily: {
