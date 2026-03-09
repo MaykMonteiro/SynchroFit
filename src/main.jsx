@@ -6,13 +6,16 @@ import "./index.css";
 
 import { AuthProvider } from "./contexts/AuthContext.jsx";
 import { PatientsProvider } from "./contexts/PatientsContext.jsx";
+import { PatientRegistrationsProvider } from "./contexts/PatientRegistrationsContext";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
       <AuthProvider>
         <PatientsProvider>
+          <PatientRegistrationsProvider>
           <App />
+          </PatientRegistrationsProvider>
         </PatientsProvider>
       </AuthProvider>
     </BrowserRouter>

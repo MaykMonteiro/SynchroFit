@@ -2,14 +2,17 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Table from "../components/Table";
 import { usePatients } from "../contexts/PatientsContext.jsx";
+import { useRegistrations } from "../contexts/PatientRegistrationsContext";
 
 export default function Patients() {
   const nav = useNavigate();
   const { patients, loading, fetchPatients } = usePatients();
+  const { registrations, fetchRegistrations } = useRegistrations();
   const [hiddenPatientIds, setHiddenPatientIds] = useState([]);
 
   useEffect(() => {
     fetchPatients();
+    fetchRegistrations();
   }, []);
 
   useEffect(() => {
@@ -40,20 +43,32 @@ export default function Patients() {
 
   const columns = ["NOME", "E-MAIL", "TELEFONE", "PLANO", "INICIO ACOMP.", "FIM ACOMP.", "AÇÕES"];
 
+  const registrationsByPatientId = Array.isArray(registrations)
+    ? registrations.reduce((acc, registration) => {
+        const patientId = String(registration.patient_id ?? "");
+        if (patientId) {
+          acc[patientId] = registration;
+        }
+        return acc;
+      }, {})
+    : {};
+
   const rows = (patients ?? [])
     .filter((p) => (p.is_active ?? p.ativo ?? 1) == 1)
     .filter((p) => !hiddenPatientIds.includes(String(p.id ?? p.patient_id)))
     .map((p) => {
       const patientId = p.id ?? p.patient_id;
+      const registration = registrationsByPatientId[String(patientId)];
 
       return [
         p.nome ?? p.name ?? "-",
         p.email ?? "-",
         p.telefone ?? p.phone ?? "-",
-        p.plano ?? p.plan ?? "-",
-        p.inicioAcomp ?? p.start_date ?? "-",
-        p.fimAcomp ?? p.end_date ?? "-",
+        registration?.plan_description ?? p.plano ?? p.plan ?? "-",
+        registration?.start_date ?? p.inicioAcomp ?? p.start_date ?? "-",
+        registration?.end_date ?? p.fimAcomp ?? p.end_date ?? "-",
         <div key={`actions-${patientId}`} className="flex items-center gap-2">
+          
           <button
             type="button"
             onClick={() => nav(`/pacientes/${patientId}/editar`)}
@@ -61,6 +76,15 @@ export default function Patients() {
           >
             Editar
           </button>
+
+          <button
+            type="button"
+            onClick={() => nav(`/pacientes/${patientId}/matricula`)}
+            className="border border-blue-600 text-blue-600 px-2 py-[2px] rounded"
+          >
+            Matrícula
+          </button>
+
           <button
             type="button"
             onClick={() => handleDelete(p)}
@@ -68,6 +92,7 @@ export default function Patients() {
           >
             Excluir
           </button>
+
         </div>,
       ];
     });
