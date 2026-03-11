@@ -25,6 +25,11 @@ export default function Sidebar() {
       <nav className="py-2">
         <Item to="/dashboard">Dashboard</Item>
         <Item to="/pacientes">Pacientes</Item>
+        <Item to="/treinos">Treinos</Item>
+        <Item to="/dietas">Dietas</Item>
+        <Item to="/antropometria">Antropometria</Item>
+        <Item to="/relatorios">Relatórios</Item>
+        <Item to="/feedback">Feedback</Item>
       </nav>
     </aside>
   );

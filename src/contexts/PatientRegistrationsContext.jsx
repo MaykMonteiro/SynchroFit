@@ -15,6 +15,10 @@ export function PatientRegistrationsProvider({ children }) {
       setRegistrations(
         Array.isArray(response.data?.["Matrículas:"])
           ? response.data["Matrículas:"]
+          : Array.isArray(response.data?.data)
+          ? response.data.data
+          : Array.isArray(response.data)
+          ? response.data
           : []
       );
     } catch (error) {
