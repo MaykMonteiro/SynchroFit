@@ -14,6 +14,10 @@ import PatientEdit from "./pages/PatientEdit.jsx";
 import PatientRegistrationCreate from "./pages/PatientRegistrationCreate";
 import Workout from "./pages/Workout";
 import Diets from "./pages/Diets";
+import Feedback from "./pages/Feedback";
+import Reports from "./pages/Reports.jsx";
+import AnthropometryCreate from "./pages/AnthropometryCreate.jsx";
+import Anthropometry from "./pages/Anthropometry.jsx";
 
 function PrivateRoute({ children }) {
   const { user } = useAuth();
@@ -43,6 +47,10 @@ export default function App() {
         <Route path="/pacientes/:id/matricula" element={<PatientRegistrationCreate />} />
         <Route path="/treinos" element={<Workout />} />
         <Route path="/dietas" element={<Diets />} />
+        <Route path="/feedback" element={<Feedback />} />
+        <Route path="/reports" element={<Reports />} />
+        <Route path="/antropometria/cadastro" element={<AnthropometryCreate />} />
+        <Route path="/antropometria" element={<Anthropometry />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

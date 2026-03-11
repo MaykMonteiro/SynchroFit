@@ -28,7 +28,7 @@ export default function Sidebar() {
         <Item to="/treinos">Treinos</Item>
         <Item to="/dietas">Dietas</Item>
         <Item to="/antropometria">Antropometria</Item>
-        <Item to="/relatorios">Relatórios</Item>
+        <Item to="/reports">Relatórios</Item>
         <Item to="/feedback">Feedback</Item>
       </nav>
     </aside>
