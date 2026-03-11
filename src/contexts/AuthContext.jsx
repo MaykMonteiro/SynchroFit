@@ -23,20 +23,31 @@ export function AuthProvider({ children }) {
         data?.data?.access_token;
 
       if (!token) {
-      console.log("Resposta do login:", data);
-      throw new Error("A API não retornou token no login.");
+        console.log("Resposta do login:", data);
+        throw new Error("A API não retornou token no login.");
       }
 
-    localStorage.setItem("token", token);
+      localStorage.setItem("token", token);
       setUser(data.educator ?? data.user ?? data?.data?.educator ?? data?.data?.user ?? { email });
     } finally {
       setAuthLoading(false);
     }
   }
 
-  function logout() {
-    localStorage.removeItem("token");
-    setUser(null);
+  async function logout() {
+    setAuthLoading(true);
+    const token = localStorage.getItem("token");
+    try {
+      await api.post("/educators/logout", {}, {
+        headers: { Authorization: token ? `Bearer ${token}` : undefined },
+      });
+    } catch (err) {
+      console.error("Erro no logout:", err);
+    } finally {
+      localStorage.removeItem("token");
+      setUser(null);
+      setAuthLoading(false);
+    }
   }
 
   const value = useMemo(

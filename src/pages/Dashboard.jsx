@@ -106,12 +106,12 @@ export default function Dashboard() {
   }, [patients, registrations]);
 
   return (
-    <div className="min-h-screen bg-[#f7f7f7] p-6">
+    <div className="min-h-screen p-6">
       <h1 className="mb-10 text-center text-3xl font-serif">
         BEM VINDO AO SEU GESTOR DE PACIENTES.
       </h1>
 
-      <div className="mx-auto w-full max-w-[700px] rounded-md bg-[#dddddd] px-5 py-4">
+      <div className="mx-auto w-full rounded-md bg-sf-bgGray px-5 py-4">
         <h2 className="mb-2 text-center text-[13px] font-bold">
           PACIENTES A VENCER
         </h2>
@@ -120,7 +120,7 @@ export default function Dashboard() {
           <p className="py-6 text-center">Carregando...</p>
         ) : (
           <div className="overflow-hidden border border-gray-500 bg-white">
-            <table className="w-full border-collapse text-[12px]">
+            <table className="w-full border-collapse text-[11px]">
               <thead>
                 <tr className="bg-[#9ccd9f]">
                   <th className="border border-gray-500 px-2 py-1 text-left">NOME</th>
