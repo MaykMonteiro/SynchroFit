@@ -12,7 +12,18 @@ export function PatientsProvider({ children }) {
     setLoading(true);
     try {
       const { data } = await api.get(PATIENTS_ENDPOINT);
-      setPatients(data.data ?? data); // caso venha {data: [...]}
+      // debug: inspeciona resposta bruta e keys do primeiro item
+      console.debug("DEBUG patients raw response:", data);
+
+      const normalized = data.data ?? data;
+      if (Array.isArray(normalized) && normalized.length > 0) {
+        console.debug(
+          "DEBUG patients sample keys:",
+          Object.keys(normalized[0])
+        );
+      }
+
+      setPatients(Array.isArray(normalized) ? normalized : []); // caso venha {data: [...]}
     } catch (error) {
       console.error("Erro ao buscar pacientes:", error);
       setPatients([]);
