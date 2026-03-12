@@ -1,26 +1,72 @@
 import { useMemo } from "react";
 import { usePatients } from "../contexts/PatientsContext";
 import { useRegistrations } from "../contexts/PatientRegistrationsContext";
+import "../styles/table.css";
+
+function parseDateString(dateInput) {
+  if (!dateInput) return null;
+
+  if (dateInput instanceof Date) {
+    return isNaN(dateInput.getTime()) ? null : dateInput;
+  }
+
+  const s = String(dateInput).trim();
+
+  const dmY = /^\s*(\d{1,2})\/(\d{1,2})\/(\d{4})\s*$/;
+  const dm = /^\s*(\d{1,2})\/(\d{1,2})\s*$/;
+
+  let m;
+  if ((m = s.match(dmY))) {
+    const day = Number(m[1]);
+    const month = Number(m[2]);
+    const year = Number(m[3]);
+    const date = new Date(year, month - 1, day);
+    return isNaN(date.getTime()) ? null : date;
+  }
+
+  if ((m = s.match(dm))) {
+    const day = Number(m[1]);
+    const month = Number(m[2]);
+    const today = new Date();
+    let year = today.getFullYear();
+
+    let candidate = new Date(year, month - 1, day);
+    const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    if (candidate < todayMidnight) {
+      year += 1;
+      candidate = new Date(year, month - 1, day);
+    }
+
+    return isNaN(candidate.getTime()) ? null : candidate;
+  }
+
+  const isoGuess = new Date(s);
+  if (!isNaN(isoGuess.getTime())) return isoGuess;
+
+  return null;
+}
 
 function formatDateBR(dateString) {
-  if (!dateString) return "-";
+  const date = parseDateString(dateString);
+  if (!date) return "-";
 
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return "-";
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
 
-  return date.toLocaleDateString("pt-BR");
+  return `${day}/${month}/${year}`;
 }
 
 function getDaysLeft(endDate) {
-  if (!endDate) return null;
+  const end = parseDateString(endDate);
+  if (!end) return null;
 
   const today = new Date();
-  const end = new Date(endDate);
+  const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
-  today.setHours(0, 0, 0, 0);
   end.setHours(0, 0, 0, 0);
 
-  const diff = end - today;
+  const diff = end - todayMidnight;
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
 }
 
@@ -31,7 +77,13 @@ function formatPlan(plan) {
     semiannual: "Semestral",
   };
 
-  return plans[plan] || "-";
+  if (!plan) return "-";
+
+  if (typeof plan === "object") {
+    return plan?.description || plan?.name || plans[plan?.type] || "-";
+  }
+
+  return plans[plan] || String(plan) || "-";
 }
 
 export default function Dashboard() {
@@ -112,7 +164,7 @@ export default function Dashboard() {
       </h1>
 
       <div className="mx-auto w-full rounded-md bg-sf-bgGray px-5 py-4">
-        <h2 className="mb-2 text-center text-[13px] font-bold">
+        <h2 className="mb-2 text-center text-md font-bold">
           PACIENTES A VENCER
         </h2>
 
@@ -120,9 +172,9 @@ export default function Dashboard() {
           <p className="py-6 text-center">Carregando...</p>
         ) : (
           <div className="overflow-hidden border border-gray-500 bg-white">
-            <table className="w-full border-collapse text-[11px]">
+            <table className="table">
               <thead>
-                <tr className="bg-[#9ccd9f]">
+                <tr className="tr">
                   <th className="border border-gray-500 px-2 py-1 text-left">NOME</th>
                   <th className="border border-gray-500 px-2 py-1 text-left">E-MAIL</th>
                   <th className="border border-gray-500 px-2 py-1 text-left">TELEFONE</th>
