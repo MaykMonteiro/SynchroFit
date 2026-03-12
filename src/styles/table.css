@@ -1,3 +1,7 @@
-.table{
-    w-full text-[11px]
+.table {
+    @apply w-full text-sm;
+}
+
+.tr{
+    @apply bg-sf-green;
 }
