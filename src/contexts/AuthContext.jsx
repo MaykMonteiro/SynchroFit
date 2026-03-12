@@ -28,7 +28,13 @@ export function AuthProvider({ children }) {
       }
 
       localStorage.setItem("token", token);
-      setUser(data.educator ?? data.user ?? data?.data?.educator ?? data?.data?.user ?? { email });
+
+      setUser(
+        data.educator ??
+          data.user ??
+          data?.data?.educator ??
+          data?.data?.user ?? { email }
+      );
     } finally {
       setAuthLoading(false);
     }
@@ -37,10 +43,15 @@ export function AuthProvider({ children }) {
   async function logout() {
     setAuthLoading(true);
     const token = localStorage.getItem("token");
+
     try {
-      await api.post("/educators/logout", {}, {
-        headers: { Authorization: token ? `Bearer ${token}` : undefined },
-      });
+      await api.post(
+        "/educators/logout",
+        {},
+        {
+          headers: { Authorization: token ? `Bearer ${token}` : undefined },
+        }
+      );
     } catch (err) {
       console.error("Erro no logout:", err);
     } finally {
@@ -51,7 +62,7 @@ export function AuthProvider({ children }) {
   }
 
   const value = useMemo(
-    () => ({ user, authLoading, login, logout }),
+    () => ({ user, setUser, authLoading, login, logout }),
     [user, authLoading]
   );
 

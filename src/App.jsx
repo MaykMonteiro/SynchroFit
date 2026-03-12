@@ -18,6 +18,7 @@ import Feedback from "./pages/Feedback";
 import Reports from "./pages/Reports.jsx";
 import AnthropometryCreate from "./pages/AnthropometryCreate.jsx";
 import Anthropometry from "./pages/Anthropometry.jsx";
+import Settings from "./pages/Settings.jsx";
 
 function PrivateRoute({ children }) {
   const { user } = useAuth();
@@ -51,6 +52,7 @@ export default function App() {
         <Route path="/reports" element={<Reports />} />
         <Route path="/antropometria/cadastro" element={<AnthropometryCreate />} />
         <Route path="/antropometria" element={<Anthropometry />} />
+        <Route path="/settings" element={<Settings />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

@@ -24,7 +24,7 @@ export default function Topbar() {
 
   function handleSettings() {
     setOpen(false);
-    navigate("/configuracoes");
+    navigate("/settings");
   }
 
   function handleLogout() {
