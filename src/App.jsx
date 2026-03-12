@@ -31,8 +31,9 @@ export default function App() {
     <Routes>
       <Route element={<AuthLayout />}>
         <Route path="/" element={<Login />} />
-        <Route path="/cadastro" element={<Register />} />
       </Route>
+
+      <Route path="/cadastro" element={<Register />} />
 
       <Route
         element={
