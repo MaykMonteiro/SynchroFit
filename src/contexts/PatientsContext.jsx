@@ -1,31 +1,46 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { api } from "../services/api";
+import { useAuth } from "./AuthContext";
 
 const PatientsContext = createContext(null);
-const PATIENTS_ENDPOINT = "/educators/patients";
+
+function getToken() {
+  return localStorage.getItem("token") || "";
+}
 
 export function PatientsProvider({ children }) {
+  const { user } = useAuth();
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(false);
 
   async function fetchPatients() {
-    setLoading(true);
+    const token = getToken();
+
+    if (!token) {
+      setPatients([]);
+      return;
+    }
+
     try {
-      const { data } = await api.get(PATIENTS_ENDPOINT);
-      // debug: inspeciona resposta bruta e keys do primeiro item
-      console.debug("DEBUG patients raw response:", data);
+      setLoading(true);
 
-      const normalized = data.data ?? data;
-      if (Array.isArray(normalized) && normalized.length > 0) {
-        console.debug(
-          "DEBUG patients sample keys:",
-          Object.keys(normalized[0])
-        );
-      }
+      const response = await api.get("/educators/patients", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      });
 
-      setPatients(Array.isArray(normalized) ? normalized : []); // caso venha {data: [...]}
+      const data =
+        response.data?.patients ??
+        response.data?.PatientsData ??
+        response.data?.data ??
+        response.data ??
+        [];
+
+      setPatients(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error("Erro ao buscar pacientes:", error);
+      console.error("Erro ao buscar pacientes:", error?.response?.data ?? error);
       setPatients([]);
     } finally {
       setLoading(false);
@@ -33,82 +48,98 @@ export function PatientsProvider({ children }) {
   }
 
   async function createPatient(payload) {
+    const token = getToken();
+
+    if (!token) throw new Error("Usuário não autenticado.");
+
     try {
-      const { data } = await api.post(PATIENTS_ENDPOINT, payload);
-      const created = data.data ?? data;
-      setPatients((prev) => [created, ...prev]);
-      return created;
+      const response = await api.post("/educators/patients", payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      });
+
+      await fetchPatients();
+      return response.data;
     } catch (error) {
-      console.error("Erro ao criar paciente:", error);
+      console.error("Erro ao criar paciente:", error?.response?.data ?? error);
       throw error;
     }
   }
 
   async function updatePatient(id, payload) {
-    const resolvedId = id ?? payload?.id ?? payload?.patient_id;
-    if (resolvedId === null || resolvedId === undefined) {
-      throw new Error("ID do paciente ausente para atualização.");
-    }
+    const token = getToken();
+
+    if (!token) throw new Error("Usuário não autenticado.");
 
     try {
-      const { data } = await api.patch(`${PATIENTS_ENDPOINT}/${resolvedId}`, payload);
-      const updated = data.data ?? data;
+      const response = await api.patch(`/educators/patients/${id}`, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      });
 
-      setPatients((prev) =>
-        prev.map((p) =>
-          String(p.id ?? p.patient_id) === String(resolvedId)
-            ? { ...p, ...updated }
-            : p
-        )
-      );
-
-      return updated;
+      await fetchPatients();
+      return response.data;
     } catch (error) {
-      console.log("PATCH status:", error?.response?.status);
-      console.log("PATCH data:", JSON.stringify(error?.response?.data, null, 2));
-      console.log("PATCH payload:", payload);
       console.error("Erro ao atualizar paciente:", error?.response?.data ?? error);
       throw error;
     }
   }
 
   async function deletePatient(id) {
+    const token = getToken();
+
+    if (!token) throw new Error("Usuário não autenticado.");
+
     try {
-      await api.delete(`${PATIENTS_ENDPOINT}/${id}`);
-      setPatients((prev) =>
-        prev.filter((p) => String(p.id ?? p.patient_id) !== String(id))
-      );
+      const response = await api.delete(`/educators/patients/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      });
+
+      await fetchPatients();
+      return response.data;
     } catch (error) {
-      console.error("Erro ao deletar paciente:", error);
+      console.error("Erro ao excluir paciente:", error?.response?.data ?? error);
       throw error;
     }
   }
 
   useEffect(() => {
-    fetchPatients();
-  }, []);
-
-  const value = useMemo(
-    () => ({
-      patients,
-      loading,
-      fetchPatients,
-      createPatient,
-      updatePatient,
-      deletePatient,
-    }),
-    [patients, loading]
-  );
+    if (user) {
+      fetchPatients();
+    } else {
+      setPatients([]);
+    }
+  }, [user]);
 
   return (
-    <PatientsContext.Provider value={value}>
+    <PatientsContext.Provider
+      value={{
+        patients,
+        loading,
+        fetchPatients,
+        createPatient,
+        updatePatient,
+        deletePatient,
+      }}
+    >
       {children}
     </PatientsContext.Provider>
   );
 }
 
 export function usePatients() {
-  const ctx = useContext(PatientsContext);
-  if (!ctx) throw new Error("usePatients precisa estar dentro de <PatientsProvider>.");
-  return ctx;
+  const context = useContext(PatientsContext);
+
+  if (!context) {
+    throw new Error("usePatients deve ser usado dentro de PatientsProvider");
+  }
+
+  return context;
 }

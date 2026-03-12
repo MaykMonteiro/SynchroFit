@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo, useState } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { api } from "../services/api";
 
 const AuthContext = createContext(null);
@@ -7,62 +7,71 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(false);
 
+  useEffect(() => {
+    const savedToken = localStorage.getItem("token");
+    const savedUser = localStorage.getItem("user");
+
+    if (savedToken) {
+      api.defaults.headers.common.Authorization = `Bearer ${savedToken}`;
+    }
+
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (error) {
+        console.error("Erro ao ler usuário salvo:", error);
+        localStorage.removeItem("user");
+      }
+    }
+  }, []);
+
   async function login(email, senha) {
-    setAuthLoading(true);
     try {
-      const { data } = await api.post("/login", {
+      setAuthLoading(true);
+
+      const response = await api.post("/login", {
         email,
         password: senha,
       });
 
-      const token =
-        data.token ||
-        data.access_token ||
-        data.plainTextToken ||
-        data?.data?.token ||
-        data?.data?.access_token;
+      const token = response.data?.token;
+      const educator = response.data?.educator;
 
-      if (!token) {
-        console.log("Resposta do login:", data);
-        throw new Error("A API não retornou token no login.");
+      if (!token || !educator) {
+        console.error("Resposta de login inválida:", response.data);
+        return false;
       }
 
       localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(educator));
 
-      setUser(
-        data.educator ??
-          data.user ??
-          data?.data?.educator ??
-          data?.data?.user ?? { email }
-      );
+      api.defaults.headers.common.Authorization = `Bearer ${token}`;
+      setUser(educator);
+
+      return true;
+    } catch (error) {
+      console.error("Erro no login:", error?.response?.data ?? error);
+      return false;
     } finally {
       setAuthLoading(false);
     }
   }
 
-  async function logout() {
-    setAuthLoading(true);
-    const token = localStorage.getItem("token");
-
-    try {
-      await api.post(
-        "/educators/logout",
-        {},
-        {
-          headers: { Authorization: token ? `Bearer ${token}` : undefined },
-        }
-      );
-    } catch (err) {
-      console.error("Erro no logout:", err);
-    } finally {
-      localStorage.removeItem("token");
-      setUser(null);
-      setAuthLoading(false);
-    }
+  function logout() {
+    setUser(null);
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    delete api.defaults.headers.common.Authorization;
   }
 
   const value = useMemo(
-    () => ({ user, setUser, authLoading, login, logout }),
+    () => ({
+      user,
+      authLoading,
+      login,
+      logout,
+      setUser,
+    }),
     [user, authLoading]
   );
 
@@ -71,6 +80,8 @@ export function AuthProvider({ children }) {
 
 export function useAuth() {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth precisa estar dentro de <AuthProvider>.");
+  if (!ctx) {
+    throw new Error("useAuth precisa estar dentro de <AuthProvider>.");
+  }
   return ctx;
 }

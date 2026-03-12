@@ -11,8 +11,14 @@ export default function Login() {
 
   async function onSubmit(e) {
     e.preventDefault();
-    await login(email, senha);
-    nav("/dashboard");
+
+    const ok = await login(email, senha);
+
+    if (ok) {
+      nav("/dashboard");
+    } else {
+      alert("E-mail ou senha inválidos.");
+    }
   }
 
   return (
@@ -20,11 +26,13 @@ export default function Login() {
       <div className="text-center font-serif text-2xl mt-48 uppercase">
         Login
       </div>
+
       <div>
         <form onSubmit={onSubmit} className="p-0 m-0">
           <label className="block">
             <div className="text-lg mb-2">E-mail:</div>
             <input
+              type="email"
               className="w-full h-9 rounded px-2 mb-5 text-black text-sm"
               value={email}
               onChange={(e) => setEmail(e.target.value)}

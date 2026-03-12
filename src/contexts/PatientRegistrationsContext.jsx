@@ -1,26 +1,45 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { api } from "../services/api";
+import { useAuth } from "./AuthContext";
 
 const PatientRegistrationsContext = createContext();
 
+function getToken() {
+  return localStorage.getItem("token") || "";
+}
+
 export function PatientRegistrationsProvider({ children }) {
+  const { user } = useAuth();
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(false);
 
   async function fetchRegistrations() {
+    const token = getToken();
+
+    if (!token) {
+      setRegistrations([]);
+      return;
+    }
+
     try {
       setLoading(true);
-      const response = await api.get("/educators/patient-registrations");
+
+      const response = await api.get("/educators/patient-registrations", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      });
 
       console.debug("DEBUG registrations raw response:", response.data);
 
       const normalized = Array.isArray(response.data?.["Matrículas:"])
         ? response.data["Matrículas:"]
         : Array.isArray(response.data?.data)
-          ? response.data.data
-          : Array.isArray(response.data)
-            ? response.data
-            : [];
+        ? response.data.data
+        : Array.isArray(response.data)
+        ? response.data
+        : [];
 
       if (Array.isArray(normalized) && normalized.length > 0) {
         const keySet = Array.from(
@@ -31,7 +50,7 @@ export function PatientRegistrationsProvider({ children }) {
 
       setRegistrations(normalized);
     } catch (error) {
-      console.error("Erro ao buscar matrículas:", error);
+      console.error("Erro ao buscar matrículas:", error?.response?.data ?? error);
       setRegistrations([]);
     } finally {
       setLoading(false);
@@ -39,8 +58,12 @@ export function PatientRegistrationsProvider({ children }) {
   }
 
   useEffect(() => {
-    fetchRegistrations();
-  }, []);
+    if (user) {
+      fetchRegistrations();
+    } else {
+      setRegistrations([]);
+    }
+  }, [user]);
 
   return (
     <PatientRegistrationsContext.Provider

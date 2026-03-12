@@ -1,11 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { usePatients } from "../contexts/PatientsContext";
+import { api } from "../services/api";
 
 export default function PatientCreate() {
-
   const nav = useNavigate();
-  const { createPatient } = usePatients();
 
   const [form, setForm] = useState({
     nome: "",
@@ -14,82 +12,90 @@ export default function PatientCreate() {
     sexo: "",
     telefone: "",
     alergias: "",
-    ativo: true
+    ativo: true,
   });
+
+  const [loading, setLoading] = useState(false);
 
   function setField(field, value) {
     setForm((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   }
 
   async function salvar(e) {
-  e.preventDefault();
+    e.preventDefault();
 
-  const payload = {
-    name: form.nome,
-    email: form.email,
-    phone: form.telefone,
-    birth_date: form.nascimento || null,
-    gender: form.sexo || null,
-    allergies: form.alergias || null,
-    is_active: form.ativo
-  };
+    const payload = {
+      name: form.nome,
+      email: form.email,
+      phone: form.telefone,
+      birth_date: form.nascimento || null,
+      gender: form.sexo || null,
+      allergies: form.alergias || null,
+      is_active: form.ativo,
+    };
 
-  await createPatient(payload);
+    try {
+      setLoading(true);
 
-  nav("/pacientes");
+      await api.post("/educators/patients", payload);
+
+      nav("/pacientes");
+    } catch (error) {
+      console.error("Erro ao cadastrar paciente:", error?.response?.data ?? error);
+      alert("Não foi possível cadastrar o paciente.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <div>
-
       <h1 className="text-center font-serif text-4xl uppercase tracking-wide mb-8">
         Cadastro de Pacientes
       </h1>
 
       <div className="bg-sf-panel rounded-md shadow-soft p-6">
-
         <form onSubmit={salvar} className="space-y-4">
-
           <div>
             <label className="text-base font-serif">Nome</label>
             <input
               className="w-full h-7 rounded px-2 text-[12px]"
               value={form.nome}
-              onChange={(e)=>setField("nome", e.target.value)}
+              onChange={(e) => setField("nome", e.target.value)}
             />
           </div>
 
           <div>
             <label className="text-base font-serif">E-mail</label>
             <input
+              type="email"
               className="w-full h-7 rounded px-2 text-[12px]"
               value={form.email}
-              onChange={(e)=>setField("email", e.target.value)}
+              onChange={(e) => setField("email", e.target.value)}
             />
           </div>
 
           <div className="grid grid-cols-3 gap-3">
-
             <div>
               <label className="text-base font-serif">Nascimento</label>
               <input
                 type="date"
                 className="w-full h-7 rounded px-2 text-base"
                 value={form.nascimento}
-                onChange={(e)=>setField("nascimento", e.target.value)}
+                onChange={(e) => setField("nascimento", e.target.value)}
               />
             </div>
 
             <div>
               <label className="text-base font-serif">Sexo</label>
-                <select
+              <select
                 className="w-full h-7 font-serif bg-sf-page rounded px-2 text-base"
                 value={form.sexo}
-                onChange={(e)=>setField("sexo", e.target.value)}
-                >
+                onChange={(e) => setField("sexo", e.target.value)}
+              >
                 <option value="">Selecione</option>
                 <option value="male">Masculino</option>
                 <option value="female">Feminino</option>
@@ -102,10 +108,9 @@ export default function PatientCreate() {
               <input
                 className="w-full h-7 rounded px-2 text-[12px]"
                 value={form.telefone}
-                onChange={(e)=>setField("telefone", e.target.value)}
+                onChange={(e) => setField("telefone", e.target.value)}
               />
             </div>
-
           </div>
 
           <div>
@@ -113,7 +118,7 @@ export default function PatientCreate() {
             <textarea
               className="w-full h-20 rounded px-2 py-2 text-base"
               value={form.alergias}
-              onChange={(e)=>setField("alergias", e.target.value)}
+              onChange={(e) => setField("alergias", e.target.value)}
             />
           </div>
 
@@ -127,10 +132,9 @@ export default function PatientCreate() {
           </div>
 
           <div className="flex justify-center gap-4 pt-2">
-
             <button
               type="button"
-              onClick={()=>nav("/pacientes")}
+              onClick={() => nav("/pacientes")}
               className="w-80 border border-sf-green text-sf-greenDark px-6 py-1 text-xl rounded"
             >
               Cancelar
@@ -138,17 +142,14 @@ export default function PatientCreate() {
 
             <button
               type="submit"
-              className="w-80 bg-sf-greenDark hover:bg-sf-btnBlue  text-white px-6 py-1 text-xl rounded"
+              disabled={loading}
+              className="w-80 bg-sf-greenDark hover:bg-sf-btnBlue text-white px-6 py-1 text-xl rounded disabled:opacity-60"
             >
-              Cadastrar
+              {loading ? "Cadastrando..." : "Cadastrar"}
             </button>
-
           </div>
-
         </form>
-
       </div>
-
     </div>
   );
 }

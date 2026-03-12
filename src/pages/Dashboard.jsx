@@ -113,20 +113,20 @@ export default function Dashboard() {
         const name =
           patient?.name ||
           patient?.nome ||
-          "Paciente";
+          "";
 
         const email =
           patient?.email ||
-          "-";
+          "";
 
         const phone =
           patient?.phone ||
           patient?.telefone ||
-          "-";
+          "";
 
         const plan =
           registration?.plan_description ||
-          "-";
+          "";
 
         const endDate =
           registration?.end_date ||
