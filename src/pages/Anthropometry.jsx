@@ -15,19 +15,6 @@ function formatActivityLevel(level) {
   return map[level] ?? level;
 }
 
-function formatDateBR(dateString) {
-  if (!dateString) return "-";
-
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return "-";
-
-  return date.toLocaleDateString("pt-BR");
-}
-
-function formatStatus(value) {
-  return Number(value) === 1 ? "Ativo" : "Inativo";
-}
-
 export default function Anthropometry() {
   const nav = useNavigate();
   const [anthropometries, setAnthropometries] = useState([]);
@@ -105,12 +92,15 @@ export default function Anthropometry() {
   ];
 
   const rows = (anthropometries ?? [])
+    .filter((item) => Number(item.is_active ?? 1) === 1)
     .filter(
       (item) =>
-        !hiddenAnthropometryIds.includes(String(item.id ?? item.anthropometry_id))
+        !hiddenAnthropometryIds.includes(
+          String(item.id ?? item.anthropometry_id)
+        )
     )
     .map((item) => {
-      const anthropometryId = item.id ?? item.anthropometry_id;
+      const anthropometryId = item.anthropometry_id ?? item.id;
 
       return [
         item.name ?? "-",
