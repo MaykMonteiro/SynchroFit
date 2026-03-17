@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Table from "../components/Table";
 import { api } from "../services/api";
+import { usePatients } from "../contexts/PatientsContext.jsx";
 
 function formatDateBR(dateString) {
   if (!dateString) return "-";
@@ -14,16 +15,35 @@ function formatDateBR(dateString) {
 
 export default function Workout() {
   const nav = useNavigate();
+  const { patients, fetchPatients } = usePatients();
+
   const [workouts, setWorkouts] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [hiddenWorkoutIds, setHiddenWorkoutIds] = useState([]);
+
+  useEffect(() => {
+    fetchPatients();
+  }, []);
+
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem("hiddenWorkouts") ?? "[]");
+      if (Array.isArray(saved)) {
+        setHiddenWorkoutIds(saved.map((id) => String(id)));
+      }
+    } catch {
+      setHiddenWorkoutIds([]);
+    }
+  }, []);
 
   async function fetchWorkouts() {
     try {
       setLoading(true);
 
       const response = await api.get("/educators/workouts");
+      const data = response.data?.WorkoutData ?? response.data ?? [];
 
-      setWorkouts(response.data?.WorkoutData ?? response.data ?? []);
+      setWorkouts(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Erro ao buscar treinos:", error);
       setWorkouts([]);
@@ -36,6 +56,58 @@ export default function Workout() {
     fetchWorkouts();
   }, []);
 
+  async function handleDelete(workout) {
+    const workoutId = String(workout.workout_id ?? workout.id);
+
+    const confirmDelete = window.confirm(
+      "Tem certeza que deseja desativar este treino?"
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      const payload = {
+        patient_id: workout.patient_id,
+        workout_type_id: workout.workout_type_id,
+        start_date: workout.start_date,
+        is_active: 0,
+      };
+
+      try {
+        await api.put(`/educators/workouts/${workoutId}`, payload);
+      } catch (err) {
+        console.warn("Não foi possível atualizar is_active na API:", err);
+      }
+
+      setHiddenWorkoutIds((prev) => {
+        if (prev.includes(workoutId)) return prev;
+
+        const next = [...prev, workoutId];
+        localStorage.setItem("hiddenWorkouts", JSON.stringify(next));
+        return next;
+      });
+
+      alert("Treino excluído com sucesso!");
+    } catch (error) {
+      console.error("Erro ao ocultar treino:", error);
+      alert("Não foi possível excluir o treino.");
+    }
+  }
+
+  const patientsById = useMemo(() => {
+    return (patients ?? []).reduce((acc, p) => {
+      const id = String(p.id ?? p.patient_id ?? "");
+      if (id) acc[id] = p;
+      return acc;
+    }, {});
+  }, [patients]);
+
+  const visibleWorkouts = useMemo(() => {
+    return (workouts ?? [])
+      .filter((w) => Number(w.is_active ?? 1) === 1)
+      .filter((w) => !hiddenWorkoutIds.includes(String(w.workout_id ?? w.id)));
+  }, [workouts, hiddenWorkoutIds]);
+
   const columns = [
     "NOME",
     "E-MAIL",
@@ -45,21 +117,37 @@ export default function Workout() {
     "AÇÕES",
   ];
 
-  const rows = (workouts ?? []).map((w) => [
-    w.name ?? "-",
-    w.email ?? "-",
-    w.phone ?? "-",
-    w.workout_type_name ?? "-",
-    formatDateBR(w.start_date),
-    <div key={`actions-${w.id}`} className="flex items-center gap-2">
-      <button
-        onClick={() => nav(`/treinos/${w.id}/editar`)}
-        className="text-blue-600 border border-blue-600 px-2 py-[2px] rounded"
+  const rows = visibleWorkouts.map((w) => {
+    const patient = patientsById[String(w.patient_id ?? "")] ?? {};
+
+    return [
+      w.name ?? patient.nome ?? patient.name ?? "-",
+      w.email ?? patient.email ?? "-",
+      w.phone ?? w.telefone ?? patient.telefone ?? patient.phone ?? "-",
+      w.workout_type_name ?? "-",
+      formatDateBR(w.start_date),
+      <div
+        key={`actions-${w.workout_id ?? w.id}`}
+        className="flex items-center gap-2"
       >
-        Editar
-      </button>
-    </div>,
-  ]);
+        <button
+          type="button"
+          onClick={() => nav(`/treinos/editar/${w.workout_id ?? w.id}`)}
+          className="bg-blue-500 text-white px-3 py-1 rounded-md text-sm"
+        >
+          Editar
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleDelete(w)}
+          className="bg-red-500 text-white px-3 py-1 rounded-md text-sm"
+        >
+          Excluir
+        </button>
+      </div>,
+    ];
+  });
 
   return (
     <div>

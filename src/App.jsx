@@ -19,6 +19,9 @@ import Reports from "./pages/Reports.jsx";
 import AnthropometryCreate from "./pages/AnthropometryCreate.jsx";
 import Anthropometry from "./pages/Anthropometry.jsx";
 import Settings from "./pages/Settings.jsx";
+import FeedbackView from "./pages/FeedbackView.jsx";
+import WorkoutCreate from "./pages/WorkoutCreate.jsx";
+import WorkoutEdit from "./pages/WorkoutEdit.jsx";
 
 function PrivateRoute({ children }) {
   const { user } = useAuth();
@@ -48,8 +51,11 @@ export default function App() {
         <Route path="/pacientes/:id/editar" element={<PatientEdit />} />
         <Route path="/pacientes/:id/matricula" element={<PatientRegistrationCreate />} />
         <Route path="/treinos" element={<Workout />} />
+        <Route path="/treinos/cadastro" element={<WorkoutCreate />} />
+        <Route path="/treinos/editar/:id" element={<WorkoutEdit />} />
         <Route path="/dietas" element={<Diets />} />
         <Route path="/feedback" element={<Feedback />} />
+        <Route path="/feedback/visualizar" element={<FeedbackView />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/antropometria/cadastro" element={<AnthropometryCreate />} />
         <Route path="/antropometria" element={<Anthropometry />} />

@@ -38,7 +38,6 @@ export default function Feedbacks() {
         comment: item.comment,
         created_at: item.created_at,
         type: "Dieta",
-        editRoute: `/dietas/feedbacks/${item.id}/editar`,
       }));
 
       const workoutFeedbacks = (workoutResponse.data?.DataFeedback ?? []).map(
@@ -48,7 +47,6 @@ export default function Feedbacks() {
           comment: item.comment,
           created_at: item.created_at,
           type: "Treino",
-          editRoute: `/treinos/feedbacks/${item.id}/editar`,
         })
       );
 
@@ -82,9 +80,16 @@ export default function Feedbacks() {
     feedback.type ?? "-",
     formatComment(feedback.comment),
     formatDateBR(feedback.created_at),
-    <div key={`actions-${feedback.type}-${feedback.id}`} className="flex items-center gap-2">
+    <div
+      key={`actions-${feedback.type}-${feedback.id}`}
+      className="flex items-center gap-2"
+    >
       <button
-        onClick={() => nav(feedback.editRoute)}
+        onClick={() =>
+          nav("/feedback/visualizar", {
+            state: { feedback },
+          })
+        }
         className="text-blue-600 border border-blue-600 px-2 py-[2px] rounded"
       >
         Visualizar
