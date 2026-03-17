@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Table from "../components/Table";
 import { api } from "../services/api";
+import { usePatients } from "../contexts/PatientsContext.jsx";
 
 function formatDateBR(dateString) {
   if (!dateString) return "-";
@@ -20,16 +21,35 @@ function formatObjective(text) {
 
 export default function Diets() {
   const nav = useNavigate();
+  const { patients, fetchPatients } = usePatients();
+
   const [diets, setDiets] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [hiddenDietIds, setHiddenDietIds] = useState([]);
+
+  useEffect(() => {
+    fetchPatients();
+  }, []);
+
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem("hiddenDiets") ?? "[]");
+      if (Array.isArray(saved)) {
+        setHiddenDietIds(saved.map((id) => String(id)));
+      }
+    } catch {
+      setHiddenDietIds([]);
+    }
+  }, []);
 
   async function fetchDiets() {
     try {
       setLoading(true);
 
       const response = await api.get("/educators/diets");
+      const data = response.data?.diets ?? response.data ?? [];
 
-      setDiets(response.data?.diets ?? []);
+      setDiets(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Erro ao buscar dietas:", error);
       setDiets([]);
@@ -42,30 +62,91 @@ export default function Diets() {
     fetchDiets();
   }, []);
 
+  async function handleDelete(diet) {
+    const dietId = String(diet.diet_id ?? diet.id);
+
+    const confirmed = window.confirm(
+      "Tem certeza que deseja finalizar/excluir esta dieta?"
+    );
+
+    if (!confirmed) return;
+
+    try {
+      try {
+        await api.delete(`/educators/diets/${dietId}`);
+      } catch (err) {
+        console.warn("Não foi possível excluir/finalizar na API:", err);
+      }
+
+      setHiddenDietIds((prev) => {
+        if (prev.includes(dietId)) return prev;
+
+        const next = [...prev, dietId];
+        localStorage.setItem("hiddenDiets", JSON.stringify(next));
+        return next;
+      });
+
+      alert("Dieta excluída com sucesso!");
+    } catch (error) {
+      console.error("Erro ao ocultar dieta:", error);
+      alert("Não foi possível excluir a dieta.");
+    }
+  }
+
+  const patientsById = useMemo(() => {
+    return (patients ?? []).reduce((acc, p) => {
+      const id = String(p.id ?? p.patient_id ?? "");
+      if (id) acc[id] = p;
+      return acc;
+    }, {});
+  }, [patients]);
+
+  const visibleDiets = useMemo(() => {
+    return (diets ?? []).filter(
+      (diet) => !hiddenDietIds.includes(String(diet.diet_id ?? diet.id))
+    );
+  }, [diets, hiddenDietIds]);
+
   const columns = [
     "NOME",
     "E-MAIL",
     "TELEFONE",
     "OBJETIVO",
-    "INICIO ACOMP.",
+    "INÍCIO ACOMP",
     "AÇÕES",
-  ]
+  ];
 
-  const rows = (diets ?? []).map((diet) => [
-    diet.patient_name ?? "-",
-    diet.email ?? "-",
-    diet.phone ?? "-",
-    formatObjective(diet.objective),
-    formatDateBR(diet.start_date),
-    <div key={`actions-${diet.id}`} className="flex items-center gap-2">
-      <button
-        onClick={() => nav(`/dietas/${diet.id}/editar`)}
-        className="text-blue-600 border border-blue-600 px-2 py-[2px] rounded"
+  const rows = visibleDiets.map((diet) => {
+    const patient = patientsById[String(diet.patient_id ?? "")] ?? {};
+
+    return [
+      diet.patient_name ?? patient.nome ?? patient.name ?? "-",
+      diet.email ?? patient.email ?? "-",
+      diet.phone ?? diet.telefone ?? patient.telefone ?? patient.phone ?? "-",
+      formatObjective(diet.objective),
+      formatDateBR(diet.start_date),
+      <div
+        key={`actions-${diet.diet_id ?? diet.id}`}
+        className="flex items-center gap-2"
       >
-        Editar
-      </button>
-    </div>,
-  ]);
+        <button
+          type="button"
+          onClick={() => nav(`/dietas/${diet.diet_id ?? diet.id}/editar`)}
+          className="bg-blue-500 text-white px-3 py-1 rounded-md text-sm"
+        >
+          Editar
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleDelete(diet)}
+          className="bg-red-500 text-white px-3 py-1 rounded-md text-sm"
+        >
+          Excluir
+        </button>
+      </div>,
+    ];
+  });
 
   return (
     <div>
@@ -75,7 +156,7 @@ export default function Diets() {
 
       <div className="mb-3">
         <button
-          onClick={() => nav("/dietas/cadastro")}
+          onClick={() => nav("/dietas/cadastrar")}
           className="bg-sf-greenDark text-white px-6 py-1 text-sm rounded-xl"
         >
           CADASTRE

@@ -22,6 +22,8 @@ import Settings from "./pages/Settings.jsx";
 import FeedbackView from "./pages/FeedbackView.jsx";
 import WorkoutCreate from "./pages/WorkoutCreate.jsx";
 import WorkoutEdit from "./pages/WorkoutEdit.jsx";
+import DietCreate from "./pages/DietCreate.jsx";
+import DietEdit from "./pages/DietEdit.jsx";
 
 function PrivateRoute({ children }) {
   const { user } = useAuth();
@@ -54,6 +56,8 @@ export default function App() {
         <Route path="/treinos/cadastro" element={<WorkoutCreate />} />
         <Route path="/treinos/editar/:id" element={<WorkoutEdit />} />
         <Route path="/dietas" element={<Diets />} />
+        <Route path="/dietas/cadastrar" element={<DietCreate />} />
+        <Route path="/dietas/:id/editar" element={<DietEdit />} />
         <Route path="/feedback" element={<Feedback />} />
         <Route path="/feedback/visualizar" element={<FeedbackView />} />
         <Route path="/reports" element={<Reports />} />
