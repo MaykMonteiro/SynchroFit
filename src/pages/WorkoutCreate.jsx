@@ -41,7 +41,7 @@ export default function WorkoutCreate() {
 
       const [patientsResponse, workoutTypesResponse, exercisesResponse] =
         await Promise.all([
-          api.get("/educators/patients/for-educator"),
+          api.get("/educators/patient/for-educator"),
           api.get("/educators/workout-type"),
           api.get("/educators/exercises"),
         ]);
@@ -168,7 +168,7 @@ export default function WorkoutCreate() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f3f3f3] px-8 py-6">
+    <div className="min-h-screen px-8 py-6">
       <div className="mx-auto max-w-5xl">
         <h1 className="mb-8 text-center font-serif text-[44px] text-[#2f2f2f]">
           CADASTRO DE TREINOS
@@ -183,7 +183,7 @@ export default function WorkoutCreate() {
               <select
                 value={form.patient_id}
                 onChange={(e) => setField("patient_id", e.target.value)}
-                className="input"
+                className="w-full h-10 rounded-md px-3 outline-none bg-white"
                 required
                 disabled={loadingOptions}
               >
@@ -205,7 +205,7 @@ export default function WorkoutCreate() {
               <select
                 value={form.workout_type_id}
                 onChange={(e) => setField("workout_type_id", e.target.value)}
-                className="input"
+                className="w-full h-10 rounded-md px-3 outline-none bg-white"
                 disabled={loadingOptions}
               >
                 <option value="">
@@ -226,7 +226,7 @@ export default function WorkoutCreate() {
               <select
                 value={form.exercise_id}
                 onChange={(e) => setField("exercise_id", e.target.value)}
-                className="input"
+                className="w-full h-10 rounded-md px-3 outline-none bg-white"
                 required
                 disabled={loadingOptions}
               >
@@ -250,7 +250,7 @@ export default function WorkoutCreate() {
                 min="1"
                 value={form.series}
                 onChange={(e) => setField("series", e.target.value)}
-                className="input"
+                className="w-full h-10 rounded-md px-3 outline-none bg-white"
               />
             </Field>
 
@@ -260,7 +260,8 @@ export default function WorkoutCreate() {
                 min="1"
                 value={form.repetitions}
                 onChange={(e) => setField("repetitions", e.target.value)}
-                className="input"
+                className="w-full h-10 rounded-md px-3 outline-none bg-white"
+                
               />
             </Field>
 
@@ -271,7 +272,7 @@ export default function WorkoutCreate() {
                 step="0.01"
                 value={form.weight_load}
                 onChange={(e) => setField("weight_load", e.target.value)}
-                className="input"
+                className="w-full h-10 rounded-md px-3 outline-none bg-white"
                 placeholder="Ex: 20"
               />
             </Field>
@@ -282,7 +283,7 @@ export default function WorkoutCreate() {
                 min="0"
                 value={form.rest_time}
                 onChange={(e) => setField("rest_time", e.target.value)}
-                className="input"
+                className="w-full h-10 rounded-md px-3 outline-none bg-white"
                 placeholder="Em segundos"
               />
             </Field>
@@ -291,7 +292,7 @@ export default function WorkoutCreate() {
               <input
                 type="text"
                 value={muscleGroupName}
-                className="input"
+                className="w-full h-10 rounded-md px-3 outline-none bg-white"
                 readOnly
                 placeholder="Será preenchido pelo exercício"
               />
@@ -303,7 +304,7 @@ export default function WorkoutCreate() {
                 min="0"
                 value={form.duration_time}
                 onChange={(e) => setField("duration_time", e.target.value)}
-                className="input"
+                className="w-full h-10 rounded-md px-3 outline-none bg-white"
                 placeholder="Em minutos"
               />
             </Field>
@@ -312,7 +313,7 @@ export default function WorkoutCreate() {
               <select
                 value={form.day_of_week}
                 onChange={(e) => setField("day_of_week", e.target.value)}
-                className="input"
+                className="w-full h-10 rounded-md px-3 outline-none bg-white"
               >
                 <option value="1">Segunda</option>
                 <option value="2">Terça</option>
@@ -331,7 +332,7 @@ export default function WorkoutCreate() {
                 type="date"
                 value={form.start_date}
                 onChange={(e) => setField("start_date", e.target.value)}
-                className="input text-center"
+                className="w-full h-10 rounded-md px-3 outline-none bg-white"
                 required
               />
             </Field>
@@ -341,7 +342,7 @@ export default function WorkoutCreate() {
                 type="date"
                 value={form.end_date}
                 onChange={(e) => setField("end_date", e.target.value)}
-                className="input text-center"
+                className="w-full h-10 rounded-md px-3 outline-none bg-white"
               />
             </Field>
 
@@ -350,7 +351,7 @@ export default function WorkoutCreate() {
                 type="date"
                 value={form.finalized_at}
                 onChange={(e) => setField("finalized_at", e.target.value)}
-                className="input text-center"
+                className="w-full h-10 rounded-md px-3 outline-none bg-white"
               />
             </Field>
           </div>
@@ -360,7 +361,7 @@ export default function WorkoutCreate() {
               <input
                 type="text"
                 value={exerciseLink}
-                className="input"
+                className="w-full h-10 rounded-md px-3 outline-none bg-white"
                 readOnly
                 placeholder="Link do exercício"
               />
@@ -391,8 +392,8 @@ export default function WorkoutCreate() {
 
             <button
               type="submit"
-              disabled={loading || loadingOptions}
-              className="h-[40px] w-full max-w-[320px] rounded-[5px] bg-[#8bc79a] text-[18px] text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={loading || loadingOptions}              
+              className="h-[40px] w-full max-w-[320px] hover:bg-sf-btnBlue rounded-[5px] bg-[#8bc79a] text-[18px] text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loading ? "Cadastrando..." : "Cadastrar"}
             </button>

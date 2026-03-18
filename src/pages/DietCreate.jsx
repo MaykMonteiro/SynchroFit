@@ -46,7 +46,7 @@ export default function DietCreate() {
       setLoadingPage(true);
 
       const [patientsRes, foodsRes, mealsRes] = await Promise.all([
-        api.get("/educators/patients/for-educator").catch(() => null),
+        api.get("/educators/patient/for-educator").catch(() => null),
         api.get("/educators/foods").catch(() => null),
         api.get("/educators/meals").catch(() => null),
       ]);
@@ -283,13 +283,12 @@ export default function DietCreate() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f3f3f3] font-serif px-6 py-6">
+    <div className="min-h-screen font-serif px-6 py-6">
       <h1 className="text-center text-[44px] text-[#2f2f2f] mb-8">
         CADASTRO DE DIETA
       </h1>
-
-      <form onSubmit={handleSubmit} className="max-w-[920px] mx-auto">
-        <div className="bg-[#d9d9d9] rounded-[18px] px-10 py-8 mb-8">
+      <form onSubmit={handleSubmit} className="max-w-full mx-auto">
+        <div className="bg-sf-panel rounded-[18px] px-10 py-8 mb-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-5">
             <div>
               <label className="block text-[18px] mb-1">Paciente</label>
@@ -555,7 +554,7 @@ export default function DietCreate() {
             <button
               type="submit"
               disabled={saving}
-              className="w-full md:w-[340px] h-12 rounded-md bg-[#98cf9b] text-white text-[20px] hover:opacity-90 transition disabled:opacity-60"
+              className="w-80 bg-sf-greenDark hover:bg-sf-btnBlue text-white px-6 py-1 text-xl rounded disabled:opacity-60"
             >
               {saving ? "Cadastrando..." : "Cadastrar"}
             </button>

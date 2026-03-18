@@ -55,7 +55,7 @@ export default function WorkoutEdit() {
         workoutResponse,
         workoutItemsResponse,
       ] = await Promise.all([
-        api.get("/educators/patients/for-educator"),
+        api.get("/educators/patient/for-educator"),
         api.get("/educators/workout-type"),
         api.get("/educators/exercises"),
         api.get(`/educators/workouts/${id}`),
@@ -238,7 +238,7 @@ export default function WorkoutEdit() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f3f3f3] px-8 py-6">
+    <div className="min-h-screen px-8 py-6">
       <div className="mx-auto max-w-5xl">
         <h1 className="mb-8 text-center font-serif text-[44px] text-[#2f2f2f]">
           EDITAR TREINO
@@ -253,9 +253,9 @@ export default function WorkoutEdit() {
               <select
                 value={form.patient_id}
                 onChange={(e) => setField("patient_id", e.target.value)}
-                className="input"
+                className="w-full h-10 rounded-md px-3 outline-none bg-white"
                 required
-                disabled={loadingData}
+                disabled
               >
                 <option value="">Selecione</option>
                 {patients.map((patient) => (
@@ -273,7 +273,7 @@ export default function WorkoutEdit() {
               <select
                 value={form.workout_type_id}
                 onChange={(e) => setField("workout_type_id", e.target.value)}
-                className="input"
+                className="w-full h-10 rounded-md px-3 outline-none bg-white"
                 disabled={loadingData}
               >
                 <option value="">Selecione</option>
@@ -292,7 +292,7 @@ export default function WorkoutEdit() {
               <select
                 value={form.exercise_id}
                 onChange={(e) => setField("exercise_id", e.target.value)}
-                className="input"
+                className="w-full h-10 rounded-md px-3 outline-none bg-white"
                 required
                 disabled={loadingData}
               >
@@ -314,7 +314,7 @@ export default function WorkoutEdit() {
                 min="1"
                 value={form.series}
                 onChange={(e) => setField("series", e.target.value)}
-                className="input"
+                className="w-full h-10 rounded-md px-3 outline-none bg-white"
               />
             </Field>
 
@@ -335,7 +335,7 @@ export default function WorkoutEdit() {
                 step="0.01"
                 value={form.weight_load}
                 onChange={(e) => setField("weight_load", e.target.value)}
-                className="input"
+                className="w-full h-10 rounded-md px-3 outline-none bg-white"
               />
             </Field>
 
@@ -345,7 +345,7 @@ export default function WorkoutEdit() {
                 min="0"
                 value={form.rest_time}
                 onChange={(e) => setField("rest_time", e.target.value)}
-                className="input"
+                className="w-full h-10 rounded-md px-3 outline-none bg-white"
               />
             </Field>
 
@@ -364,7 +364,7 @@ export default function WorkoutEdit() {
                 min="0"
                 value={form.duration_time}
                 onChange={(e) => setField("duration_time", e.target.value)}
-                className="input"
+                className="w-full h-10 rounded-md px-3 outline-none bg-white"
               />
             </Field>
 
@@ -372,7 +372,7 @@ export default function WorkoutEdit() {
               <select
                 value={form.day_of_week}
                 onChange={(e) => setField("day_of_week", e.target.value)}
-                className="input"
+                className="w-full h-10 rounded-md px-3 outline-none bg-white"
               >
                 <option value="1">Segunda</option>
                 <option value="2">Terça</option>
@@ -391,7 +391,7 @@ export default function WorkoutEdit() {
                 type="date"
                 value={form.start_date}
                 onChange={(e) => setField("start_date", e.target.value)}
-                className="input text-center"
+                className="w-full h-10 rounded-md px-3 outline-none bg-white"
                 required
               />
             </Field>
@@ -401,7 +401,7 @@ export default function WorkoutEdit() {
                 type="date"
                 value={form.end_date}
                 onChange={(e) => setField("end_date", e.target.value)}
-                className="input text-center"
+                className="w-full h-10 rounded-md px-3 outline-none bg-white"
               />
             </Field>
 
@@ -410,7 +410,7 @@ export default function WorkoutEdit() {
                 type="date"
                 value={form.finalized_at}
                 onChange={(e) => setField("finalized_at", e.target.value)}
-                className="input text-center"
+                className="w-full h-10 rounded-md px-3 outline-none bg-white"
               />
             </Field>
           </div>

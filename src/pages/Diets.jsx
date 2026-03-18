@@ -132,7 +132,7 @@ export default function Diets() {
         <button
           type="button"
           onClick={() => nav(`/dietas/${diet.diet_id ?? diet.id}/editar`)}
-          className="bg-blue-500 text-white px-3 py-1 rounded-md text-sm"
+          className="border border-green-600 text-green-600 px-2 py-[2px] rounded"
         >
           Editar
         </button>
@@ -140,7 +140,7 @@ export default function Diets() {
         <button
           type="button"
           onClick={() => handleDelete(diet)}
-          className="bg-red-500 text-white px-3 py-1 rounded-md text-sm"
+          className="border border-red-600 text-red-600 px-2 py-[2px] rounded"
         >
           Excluir
         </button>

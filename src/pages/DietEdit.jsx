@@ -49,7 +49,7 @@ export default function DietEdit() {
 
       const [patientsRes, foodsRes, mealsRes, dietRes, dietItemsRes] =
         await Promise.all([
-          api.get("/educators/patients/for-educator").catch(() => null),
+          api.get("/educators/patient/for-educator").catch(() => null),
           api.get("/educators/foods").catch(() => null),
           api.get("/educators/meals").catch(() => null),
           api.get(`/educators/diets/${id}`),
@@ -320,7 +320,7 @@ export default function DietEdit() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f3f3f3] font-serif px-6 py-6">
+    <div className="min-h-screen font-serif px-6 py-6">
       <h1 className="text-center text-[44px] text-[#2f2f2f] mb-8">
         EDITAR DIETA
       </h1>
@@ -331,6 +331,7 @@ export default function DietEdit() {
             <div>
               <label className="block text-[18px] mb-1">Paciente</label>
               <select
+                disabled
                 value={form.patient_id}
                 onChange={(e) => setField("patient_id", e.target.value)}
                 className="w-full h-10 rounded-md px-3 outline-none bg-white"

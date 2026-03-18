@@ -133,7 +133,7 @@ export default function Workout() {
         <button
           type="button"
           onClick={() => nav(`/treinos/editar/${w.workout_id ?? w.id}`)}
-          className="bg-blue-500 text-white px-3 py-1 rounded-md text-sm"
+          className="border border-green-600 text-green-600 px-2 py-[2px] rounded"
         >
           Editar
         </button>
@@ -141,7 +141,7 @@ export default function Workout() {
         <button
           type="button"
           onClick={() => handleDelete(w)}
-          className="bg-red-500 text-white px-3 py-1 rounded-md text-sm"
+          className="border border-red-600 text-red-600 px-2 py-[2px] rounded"
         >
           Excluir
         </button>
