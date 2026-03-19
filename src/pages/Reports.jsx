@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -8,152 +8,9 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts";
+import { api } from "../services/api";
 
-const mockPatients = [
-  { id: 1, name: "Talita Bueno" },
-  { id: 2, name: "Alvena Watsica" },
-  { id: 4, name: "Hipolito Crona" },
-];
-
-const mockReports = {
-  diet: {
-    1: {
-      weight: [
-        { date: "01/04", value: 82 },
-        { date: "01/05", value: 80 },
-        { date: "01/06", value: 79 },
-      ],
-      calories: [
-        { date: "01/04", value: 2600 },
-        { date: "01/05", value: 2450 },
-        { date: "01/06", value: 2300 },
-      ],
-      tmb: [
-        { date: "01/04", value: 1850 },
-        { date: "01/05", value: 1820 },
-        { date: "01/06", value: 1800 },
-      ],
-      bodyFat: [
-        { date: "01/04", value: 24 },
-        { date: "01/05", value: 22 },
-        { date: "01/06", value: 20 },
-      ],
-    },
-    2: {
-      weight: [
-        { date: "01/04", value: 71 },
-        { date: "01/05", value: 70 },
-        { date: "01/06", value: 69 },
-      ],
-      calories: [
-        { date: "01/04", value: 2800 },
-        { date: "01/05", value: 2700 },
-        { date: "01/06", value: 2550 },
-      ],
-      tmb: [
-        { date: "01/04", value: 1700 },
-        { date: "01/05", value: 1690 },
-        { date: "01/06", value: 1680 },
-      ],
-      bodyFat: [
-        { date: "01/04", value: 28 },
-        { date: "01/05", value: 27 },
-        { date: "01/06", value: 25 },
-      ],
-    },
-    4: {
-      weight: [
-        { date: "01/04", value: 114 },
-        { date: "01/05", value: 113 },
-        { date: "01/06", value: 111 },
-      ],
-      calories: [
-        { date: "01/04", value: 3000 },
-        { date: "01/05", value: 2900 },
-        { date: "01/06", value: 2800 },
-      ],
-      tmb: [
-        { date: "01/04", value: 2200 },
-        { date: "01/05", value: 2170 },
-        { date: "01/06", value: 2150 },
-      ],
-      bodyFat: [
-        { date: "01/04", value: 31 },
-        { date: "01/05", value: 29 },
-        { date: "01/06", value: 27 },
-      ],
-    },
-  },
-
-  workout: {
-    1: {
-      weight: [
-        { date: "01/04", value: 82 },
-        { date: "01/05", value: 83 },
-        { date: "01/06", value: 84 },
-      ],
-      loads: [
-        { date: "01/04", value: 40 },
-        { date: "01/05", value: 45 },
-        { date: "01/06", value: 50 },
-      ],
-      repetitions: [
-        { date: "01/04", value: 10 },
-        { date: "01/05", value: 12 },
-        { date: "01/06", value: 14 },
-      ],
-      bodyFat: [
-        { date: "01/04", value: 24 },
-        { date: "01/05", value: 23 },
-        { date: "01/06", value: 22 },
-      ],
-    },
-    2: {
-      weight: [
-        { date: "01/04", value: 71 },
-        { date: "01/05", value: 72 },
-        { date: "01/06", value: 73 },
-      ],
-      loads: [
-        { date: "01/04", value: 20 },
-        { date: "01/05", value: 25 },
-        { date: "01/06", value: 30 },
-      ],
-      repetitions: [
-        { date: "01/04", value: 8 },
-        { date: "01/05", value: 10 },
-        { date: "01/06", value: 12 },
-      ],
-      bodyFat: [
-        { date: "01/04", value: 28 },
-        { date: "01/05", value: 27 },
-        { date: "01/06", value: 26 },
-      ],
-    },
-    4: {
-      weight: [
-        { date: "01/04", value: 114 },
-        { date: "01/05", value: 112 },
-        { date: "01/06", value: 110 },
-      ],
-      loads: [
-        { date: "01/04", value: 60 },
-        { date: "01/05", value: 70 },
-        { date: "01/06", value: 80 },
-      ],
-      repetitions: [
-        { date: "01/04", value: 6 },
-        { date: "01/05", value: 8 },
-        { date: "01/06", value: 10 },
-      ],
-      bodyFat: [
-        { date: "01/04", value: 31 },
-        { date: "01/05", value: 28 },
-        { date: "01/06", value: 26 },
-      ],
-    },
-  },
-};
+// data comes from API endpoints: `progress/patients` and `progress/reports`
 
 function ChartCard({ title, data, unit = "" }) {
   return (
@@ -176,14 +33,59 @@ function ChartCard({ title, data, unit = "" }) {
 }
 
 export default function Reports() {
-  const [selectedPatient, setSelectedPatient] = useState("1");
+  const [patients, setPatients] = useState([]);
+  const [selectedPatient, setSelectedPatient] = useState("");
   const [selectedType, setSelectedType] = useState("diet");
+  const [reports, setReports] = useState(null);
+
+  useEffect(() => {
+    let mounted = true;
+    api
+      .get("/educators/progress/patients")
+      .then((res) => {
+        if (!mounted) return;
+        const data = res.data;
+        if (Array.isArray(data) && data.length > 0) {
+          setPatients(data);
+          setSelectedPatient((prev) =>
+            prev && data.some((p) => String(p.id) === prev)
+              ? prev
+              : String(data[0].id)
+          );
+        }
+      })
+      .catch(() => {
+        // keep empty patients on error
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!selectedPatient) return;
+    let mounted = true;
+    api
+      .get("/educators/progress/reports", {
+        params: { patient_id: selectedPatient, type: selectedType },
+      })
+      .then((res) => {
+        if (!mounted) return;
+        setReports(res.data || null);
+      })
+      .catch(() => {
+        setReports(null);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [selectedPatient, selectedType]);
 
   const selectedData = useMemo(() => {
-    return (
-      mockReports[selectedType]?.[selectedPatient] ?? {}
-    );
-  }, [selectedPatient, selectedType]);
+    return reports ?? {};
+  }, [reports]);
 
   const chartConfig = useMemo(() => {
     if (selectedType === "diet") {
@@ -251,12 +153,19 @@ export default function Reports() {
               value={selectedPatient}
               onChange={(e) => setSelectedPatient(e.target.value)}
               className="w-full bg-white rounded-md px-4 py-3 outline-none"
+              disabled={patients.length === 0}
             >
-              {mockPatients.map((patient) => (
-                <option key={patient.id} value={String(patient.id)}>
-                  {patient.name}
+              {patients.length === 0 ? (
+                <option value="" disabled>
+                  Carregando pacientes...
                 </option>
-              ))}
+              ) : (
+                patients.map((patient) => (
+                  <option key={patient.id} value={String(patient.id)}>
+                    {patient.name}
+                  </option>
+                ))
+              )}
             </select>
           </div>
 
