@@ -66,26 +66,10 @@ export default function Workout() {
     if (!confirmDelete) return;
 
     try {
-      const payload = {
-        patient_id: workout.patient_id,
-        workout_type_id: workout.workout_type_id,
-        start_date: workout.start_date,
-        is_active: 0,
-      };
-
-      try {
-        await api.put(`/educators/workouts/${workoutId}`, payload);
-      } catch (err) {
-        console.warn("Não foi possível atualizar is_active na API:", err);
-      }
-
-      setHiddenWorkoutIds((prev) => {
-        if (prev.includes(workoutId)) return prev;
-
-        const next = [...prev, workoutId];
-        localStorage.setItem("hiddenWorkouts", JSON.stringify(next));
-        return next;
-      });
+     
+      await api.delete(`/educators/workouts/${workoutId}`);
+  
+      console.warn("Não foi possível atualizar is_active na API:", err);
 
       alert("Treino excluído com sucesso!");
     } catch (error) {
