@@ -17,7 +17,7 @@ export default function AppLayout() {
       <div
         className={[
           "flex-1 transition-all duration-300",
-          isSidebarOpen ? "ml-[190px]" : "ml-0",
+          isSidebarOpen ? "ml-[220px]" : "ml-0",
         ].join(" ")}
       >
         <Topbar />

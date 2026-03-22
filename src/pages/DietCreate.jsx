@@ -276,26 +276,27 @@ export default function DietCreate() {
 
   if (loadingPage) {
     return (
-      <div className="min-h-screen bg-[#f3f3f3] flex items-center justify-center font-serif">
-        <p className="text-[22px] text-[#2f2f2f]">Carregando...</p>
+      <div className="bg-sf-panel rounded-md shadow-soft p-6 text-center text-base font-serif">
+        Carregando...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen font-serif px-6 py-6">
-      <h1 className="text-center text-[44px] text-[#2f2f2f] mb-8">
-        CADASTRO DE DIETA
+    <div>
+      <h1 className="text-center font-serif text-4xl uppercase tracking-wide mb-4">
+        Cadastro de Dieta
       </h1>
-      <form onSubmit={handleSubmit} className="max-w-full mx-auto">
-        <div className="bg-sf-panel rounded-[18px] px-10 py-8 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-5">
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="bg-sf-panel rounded-md shadow-soft p-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <label className="block text-[18px] mb-1">Paciente</label>
+              <label className="mb-1 block text-base font-serif">Paciente</label>
               <select
                 value={form.patient_id}
                 onChange={(e) => setField("patient_id", e.target.value)}
-                className="w-full h-10 rounded-md px-3 outline-none bg-white"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
                 disabled={loadingPage}
               >
                 <option value="">
@@ -313,127 +314,141 @@ export default function DietCreate() {
             </div>
 
             <div>
-              <label className="block text-[18px] mb-1">Objetivo</label>
+              <label className="mb-1 block text-base font-serif">Objetivo</label>
               <input
                 type="text"
                 value={form.objective}
                 onChange={(e) => setField("objective", e.target.value)}
-                className="w-full h-10 rounded-md px-3 outline-none bg-white"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-[18px] mb-1">Calorias</label>
+              <label className="mb-1 block text-base font-serif">Calorias</label>
               <input
                 type="number"
                 value={form.calories}
                 onChange={(e) => setField("calories", e.target.value)}
-                className="w-full h-10 rounded-md px-3 outline-none bg-white"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-[18px] mb-1">Tipo de Dieta</label>
+              <label className="mb-1 block text-base font-serif">
+                Tipo de Dieta
+              </label>
               <input
                 type="text"
                 value={form.diet_type}
                 onChange={(e) => setField("diet_type", e.target.value)}
-                className="w-full h-10 rounded-md px-3 outline-none bg-white"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-[18px] mb-1">Carboidratos</label>
+              <label className="mb-1 block text-base font-serif">
+                Carboidratos
+              </label>
               <input
                 type="number"
                 value={form.carbohydrates}
                 onChange={(e) => setField("carbohydrates", e.target.value)}
-                className="w-full h-10 rounded-md px-3 outline-none bg-white"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-[18px] mb-1">Proteínas</label>
+              <label className="mb-1 block text-base font-serif">
+                Proteínas
+              </label>
               <input
                 type="number"
                 value={form.proteins}
                 onChange={(e) => setField("proteins", e.target.value)}
-                className="w-full h-10 rounded-md px-3 outline-none bg-white"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-[18px] mb-1">Gorduras</label>
+              <label className="mb-1 block text-base font-serif">Gorduras</label>
               <input
                 type="number"
                 value={form.fats}
                 onChange={(e) => setField("fats", e.target.value)}
-                className="w-full h-10 rounded-md px-3 outline-none bg-white"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-[18px] mb-1">Peso Meta</label>
+              <label className="mb-1 block text-base font-serif">
+                Peso Meta
+              </label>
               <input
                 type="text"
                 value={form.goal_weight}
                 onChange={(e) => setField("goal_weight", e.target.value)}
-                className="w-full h-10 rounded-md px-3 outline-none bg-white"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
+          <div className="grid grid-cols-1 gap-4 pt-5 md:grid-cols-3">
             <div>
-              <label className="block text-[18px] mb-1">Início da Dieta</label>
+              <label className="mb-1 block text-base font-serif">
+                Início da Dieta
+              </label>
               <input
                 type="date"
                 value={form.start_date}
                 onChange={(e) => setField("start_date", e.target.value)}
-                className="w-full h-10 rounded-md px-3 outline-none bg-white"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-[18px] mb-1">Fim da Dieta</label>
+              <label className="mb-1 block text-base font-serif">
+                Fim da Dieta
+              </label>
               <input
                 type="date"
                 value={form.end_date}
                 onChange={(e) => setField("end_date", e.target.value)}
-                className="w-full h-10 rounded-md px-3 outline-none bg-white"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-[18px] mb-1">
+              <label className="mb-1 block text-base font-serif">
                 Finalização da Dieta
               </label>
               <input
                 type="date"
                 value={form.finalized_at}
                 onChange={(e) => setField("finalized_at", e.target.value)}
-                className="w-full h-10 rounded-md px-3 outline-none bg-white"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
               />
             </div>
           </div>
         </div>
 
-        <div className="bg-[#d9d9d9] rounded-[18px] px-10 py-8">
-          <div className="space-y-8">
+        <div className="bg-sf-panel rounded-md shadow-soft p-6">
+          <div className="space-y-6">
             {items.map((item, index) => (
               <div
                 key={index}
-                className="border-b border-[#c4c4c4] pb-6 last:border-b-0"
+                className="border-b border-gray-300 pb-6 last:border-b-0"
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-5">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
-                    <label className="block text-[18px] mb-1">Refeição</label>
+                    <label className="mb-1 block text-base font-serif">
+                      Refeição
+                    </label>
                     <select
                       value={item.meals_id}
                       onChange={(e) =>
                         updateItem(index, "meals_id", e.target.value)
                       }
-                      className="w-full h-10 rounded-md px-3 outline-none bg-white"
+                      className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
                     >
                       <option value="">Tipo Refeição</option>
                       {meals.map((meal) => (
@@ -445,7 +460,7 @@ export default function DietCreate() {
                   </div>
 
                   <div>
-                    <label className="block text-[18px] mb-1">
+                    <label className="mb-1 block text-base font-serif">
                       Horário da Refeição
                     </label>
                     <input
@@ -454,18 +469,20 @@ export default function DietCreate() {
                       onChange={(e) =>
                         updateItem(index, "meal_time", e.target.value)
                       }
-                      className="w-full h-10 rounded-md px-3 outline-none bg-white"
+                      className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[18px] mb-1">Alimento</label>
+                    <label className="mb-1 block text-base font-serif">
+                      Alimento
+                    </label>
                     <select
                       value={item.food_id}
                       onChange={(e) =>
                         updateItem(index, "food_id", e.target.value)
                       }
-                      className="w-full h-10 rounded-md px-3 outline-none bg-white"
+                      className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
                     >
                       <option value="">Selecionar Alimento</option>
                       {foods.map((food) => (
@@ -477,7 +494,7 @@ export default function DietCreate() {
                   </div>
 
                   <div>
-                    <label className="block text-[18px] mb-1">
+                    <label className="mb-1 block text-base font-serif">
                       Und / Gr / Ml / L
                     </label>
                     <div className="grid grid-cols-2 gap-3">
@@ -487,7 +504,7 @@ export default function DietCreate() {
                         onChange={(e) =>
                           updateItem(index, "quantity", e.target.value)
                         }
-                        className="w-full h-10 rounded-md px-3 outline-none bg-white"
+                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
                         placeholder="Quantidade"
                       />
 
@@ -496,7 +513,7 @@ export default function DietCreate() {
                         onChange={(e) =>
                           updateItem(index, "measure", e.target.value)
                         }
-                        className="w-full h-10 rounded-md px-3 outline-none bg-white"
+                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
                       >
                         <option value="und">und</option>
                         <option value="gr">gr</option>
@@ -507,24 +524,26 @@ export default function DietCreate() {
                   </div>
 
                   <div className="md:col-span-2">
-                    <label className="block text-[18px] mb-1">Outro</label>
+                    <label className="mb-1 block text-base font-serif">
+                      Outro
+                    </label>
                     <input
                       type="text"
                       value={item.others}
                       onChange={(e) =>
                         updateItem(index, "others", e.target.value)
                       }
-                      className="w-full h-10 rounded-md px-3 outline-none bg-[#bdbdbd] text-white placeholder:text-white/80"
+                      className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
                       placeholder="Outro"
                     />
                   </div>
                 </div>
 
-                <div className="flex justify-end mt-4">
+                <div className="flex justify-end pt-4">
                   <button
                     type="button"
                     onClick={() => removeItem(index)}
-                    className="border border-red-500 text-red-600 px-4 py-2 rounded-md hover:bg-red-50 transition"
+                    className="rounded-md border border-red-500 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition"
                   >
                     Remover item
                   </button>
@@ -536,17 +555,17 @@ export default function DietCreate() {
           <button
             type="button"
             onClick={addItem}
-            className="mt-4 w-10 h-10 rounded-full bg-black text-white text-[24px] flex items-center justify-center"
+            className="mt-4 flex h-10 w-10 items-center justify-center rounded-full bg-sf-greenDark text-xl text-white hover:bg-sf-green"
             title="Adicionar item"
           >
             +
           </button>
 
-          <div className="flex flex-col md:flex-row justify-between gap-6 mt-14">
+          <div className="flex flex-col justify-center gap-3 pt-8 md:flex-row md:justify-between">
             <button
               type="button"
               onClick={() => nav("/dietas")}
-              className="w-full md:w-[340px] h-12 rounded-md border border-[#23a046] text-[#23a046] text-[20px] hover:bg-[#eef9f0] transition"
+              className="w-full rounded-xl border border-sf-green text-sf-greenDark px-6 py-2 text-base md:w-80"
             >
               Cancelar
             </button>
@@ -554,7 +573,7 @@ export default function DietCreate() {
             <button
               type="submit"
               disabled={saving}
-              className="w-80 bg-sf-greenDark hover:bg-sf-btnBlue text-white px-6 py-1 text-xl rounded disabled:opacity-60"
+              className="w-full rounded-xl bg-sf-greenDark text-white px-6 py-2 text-base hover:bg-sf-green disabled:opacity-60 md:w-80"
             >
               {saving ? "Cadastrando..." : "Cadastrar"}
             </button>

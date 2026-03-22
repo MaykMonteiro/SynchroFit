@@ -1,17 +1,41 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
+import {
+  LayoutDashboard,
+  Users,
+  Dumbbell,
+  Apple,
+  Ruler,
+  BarChart3,
+  MessageSquare,
+} from "lucide-react";
 
-const Item = ({ to, children }) => (
+const items = [
+  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/pacientes", label: "Pacientes", icon: Users },
+  { to: "/treinos", label: "Treinos", icon: Dumbbell },
+  { to: "/dietas", label: "Dietas", icon: Apple },
+  { to: "/antropometria", label: "Antropometria", icon: Ruler },
+  { to: "/reports", label: "Relatórios", icon: BarChart3 },
+  { to: "/feedback", label: "Feedback", icon: MessageSquare },
+];
+
+const Item = ({ to, icon: Icon, children }) => (
   <NavLink
     to={to}
     className={({ isActive }) =>
       [
-        "block px-4 py-2 text-md text-center uppercase tracking-wide border-b border-black/10",
-        isActive ? "border border-sf-textWhite" : "hover:bg-white",
+        "group flex items-center gap-3 mx-3 px-4 py-3 rounded-xl",
+        "text-[14px] uppercase tracking-wide transition-all duration-200",
+        "border-l-4",
+        isActive
+          ? "bg-white/30 border-sf-textBlack text-sf-textBlack shadow-sm font-semibold"
+          : "border-transparent text-sf-textBlack/90 hover:bg-white/20 hover:border-sf-textBlack/40",
       ].join(" ")
     }
   >
-    {children}
+    <Icon size={18} className="shrink-0" />
+    <span>{children}</span>
   </NavLink>
 );
 
@@ -20,50 +44,56 @@ export default function Sidebar({ isOpen, onToggle }) {
     <>
       <aside
         className={[
-          "fixed top-0 left-0 h-screen bg-sf-green text-sf-textBlack z-50",
+          "fixed top-0 left-0 h-screen w-[220px] z-50",
+          "bg-sf-green text-sf-textBlack border-r border-black/10 shadow-md",
           "transition-transform duration-300 ease-in-out",
-          "w-[190px]",
+          "flex flex-col",
           isOpen ? "translate-x-0" : "-translate-x-full",
         ].join(" ")}
       >
-        <div className="px-4 py-3 mt-5 mb-16">
-          <div className="flex items-center justify-start gap-3">
+        <div className="px-4 pt-5 pb-6 border-b border-black/10">
+          <div className="flex items-center gap-3">
             <button
               onClick={onToggle}
-              className="flex flex-col justify-center items-center gap-1 w-10 h-10 rounded hover:bg-white/20 transition"
+              className="flex flex-col justify-center items-center gap-1 w-10 h-10 rounded-xl hover:bg-white/20 transition"
               aria-label="Mostrar ou esconder menu"
               type="button"
             >
-              <span className="block w-6 h-[2px] bg-sf-textBlack"></span>
-              <span className="block w-6 h-[2px] bg-sf-textBlack"></span>
-              <span className="block w-6 h-[2px] bg-sf-textBlack"></span>
+              <span className="block w-5 h-[2px] bg-sf-textBlack rounded"></span>
+              <span className="block w-5 h-[2px] bg-sf-textBlack rounded"></span>
+              <span className="block w-5 h-[2px] bg-sf-textBlack rounded"></span>
             </button>
 
-            <div className="text-lg font-serif uppercase">Menu</div>
+            <div>
+              <div className="text-[11px] uppercase tracking-[0.18em] text-sf-textBlack/60">
+                Synchro Fit
+              </div>
+              <div className="text-lg font-serif uppercase leading-none">
+                Menu
+              </div>
+            </div>
           </div>
         </div>
 
-        <nav className="py-2">
-          <Item to="/dashboard">Dashboard</Item>
-          <Item to="/pacientes">Pacientes</Item>
-          <Item to="/treinos">Treinos</Item>
-          <Item to="/dietas">Dietas</Item>
-          <Item to="/antropometria">Antropometria</Item>
-          <Item to="/reports">Relatórios</Item>
-          <Item to="/feedback">Feedback</Item>
+        <nav className="py-4 flex flex-col gap-1">
+          {items.map(({ to, label, icon }) => (
+            <Item key={to} to={to} icon={icon}>
+              {label}
+            </Item>
+          ))}
         </nav>
       </aside>
 
       {!isOpen && (
         <button
           onClick={onToggle}
-          className="fixed top-6 left-4 z-50 flex flex-col justify-center items-center gap-1 w-10 h-10 rounded bg-sf-green hover:bg-sf-green/90 transition"
+          className="fixed top-6 left-4 z-50 flex flex-col justify-center items-center gap-1 w-11 h-11 rounded-xl bg-sf-green border border-black/10 shadow-md hover:bg-sf-green/90 transition"
           aria-label="Abrir menu"
           type="button"
         >
-          <span className="block w-6 h-[2px] bg-sf-textBlack"></span>
-          <span className="block w-6 h-[2px] bg-sf-textBlack"></span>
-          <span className="block w-6 h-[2px] bg-sf-textBlack"></span>
+          <span className="block w-5 h-[2px] bg-sf-textBlack rounded"></span>
+          <span className="block w-5 h-[2px] bg-sf-textBlack rounded"></span>
+          <span className="block w-5 h-[2px] bg-sf-textBlack rounded"></span>
         </button>
       )}
     </>

@@ -15,18 +15,23 @@ export default function WorkoutCreate() {
   const [form, setForm] = useState({
     patient_id: "",
     workout_type_id: "",
-    exercise_id: "",
-    series: "",
-    repetitions: "",
-    weight_load: "",
-    rest_time: "",
-    duration_time: "",
-    day_of_week: "1",
     start_date: "",
     end_date: "",
     finalized_at: "",
-    send_notification: false,
   });
+
+  const [items, setItems] = useState([
+    {
+      exercise_id: "",
+      series: "",
+      repetitions: "",
+      weight_load: "",
+      rest_time: "",
+      duration_time: "",
+      day_of_week: "1",
+      send_notification: false,
+    },
+  ]);
 
   function setField(field, value) {
     setForm((prev) => ({
@@ -35,35 +40,69 @@ export default function WorkoutCreate() {
     }));
   }
 
+  function updateItem(index, field, value) {
+    setItems((prev) =>
+      prev.map((item, i) =>
+        i === index
+          ? {
+              ...item,
+              [field]: value,
+            }
+          : item
+      )
+    );
+  }
+
+  function addItem() {
+    setItems((prev) => [
+      ...prev,
+      {
+        exercise_id: "",
+        series: "",
+        repetitions: "",
+        weight_load: "",
+        rest_time: "",
+        duration_time: "",
+        day_of_week: "1",
+        send_notification: false,
+      },
+    ]);
+  }
+
+  function removeItem(index) {
+    if (items.length === 1) return;
+    setItems((prev) => prev.filter((_, i) => i !== index));
+  }
+
   async function loadOptions() {
     try {
       setLoadingOptions(true);
 
       const [patientsResponse, workoutTypesResponse, exercisesResponse] =
         await Promise.all([
-          api.get("/educators/patient/for-educator"),
-          api.get("/educators/workout-type"),
-          api.get("/educators/exercises"),
+          api.get("/educators/patient/for-educator").catch(() => null),
+          api.get("/educators/workout-type").catch(() => null),
+          api.get("/educators/exercises").catch(() => null),
         ]);
 
       const patientsData =
-        patientsResponse.data?.patients ??
-        patientsResponse.data?.Patients ??
-        patientsResponse.data?.data ??
-        patientsResponse.data ??
+        patientsResponse?.data?.patients ??
+        patientsResponse?.data?.Patients ??
+        patientsResponse?.data?.data ??
+        patientsResponse?.data ??
         [];
 
       const workoutTypesData =
-        workoutTypesResponse.data?.WorkoutTypeData ??
-        workoutTypesResponse.data?.data ??
-        workoutTypesResponse.data ??
+        workoutTypesResponse?.data?.WorkoutTypeData ??
+        workoutTypesResponse?.data?.data ??
+        workoutTypesResponse?.data ??
         [];
 
       const exercisesData =
-        exercisesResponse.data?.Exercises ??
-        exercisesResponse.data?.ExerciseData ??
-        exercisesResponse.data?.data ??
-        exercisesResponse.data ??
+        exercisesResponse?.data?.Exercises ??
+        exercisesResponse?.data?.ExerciseData ??
+        exercisesResponse?.data?.data ??
+        exercisesResponse?.data ??
         [];
 
       setPatients(Array.isArray(patientsData) ? patientsData : []);
@@ -75,6 +114,7 @@ export default function WorkoutCreate() {
       setPatients([]);
       setWorkoutTypes([]);
       setExercises([]);
+      alert("Erro ao carregar pacientes, tipos de treino ou exercícios.");
     } finally {
       setLoadingOptions(false);
     }
@@ -84,18 +124,38 @@ export default function WorkoutCreate() {
     loadOptions();
   }, []);
 
-  const selectedExercise = useMemo(() => {
-    return exercises.find(
-      (exercise) =>
-        String(exercise.exercise_id ?? exercise.id) === String(form.exercise_id)
-    );
-  }, [exercises, form.exercise_id]);
+  function validateForm() {
+    if (!form.patient_id) {
+      alert("Selecione o paciente.");
+      return false;
+    }
 
-  const exerciseLink = selectedExercise?.link_exercise ?? "";
-  const muscleGroupName = selectedExercise?.muscle_group_name ?? "";
+    if (!form.start_date) {
+      alert("Preencha a data de início do treino.");
+      return false;
+    }
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+
+      if (!item.exercise_id) {
+        alert(`Selecione o exercício do item ${i + 1}.`);
+        return false;
+      }
+
+      if (!item.day_of_week) {
+        alert(`Selecione o dia da semana do item ${i + 1}.`);
+        return false;
+      }
+    }
+
+    return true;
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
+
+    if (!validateForm()) return;
 
     try {
       setLoading(true);
@@ -110,38 +170,52 @@ export default function WorkoutCreate() {
         finalized_at: form.finalized_at || null,
       };
 
-      const workoutResponse = await api.post(
-        "/educators/workouts",
-        workoutPayload
-      );
+      const workoutResponse = await api.post("/educators/workouts", workoutPayload);
 
-      const createdWorkout = workoutResponse.data?.workout;
-      const workoutId = createdWorkout?.id;
+      const createdWorkout =
+        workoutResponse?.data?.workout ||
+        workoutResponse?.data?.data ||
+        workoutResponse?.data;
+
+      const workoutId =
+        createdWorkout?.id ||
+        createdWorkout?.workout_id ||
+        workoutResponse?.data?.id ||
+        workoutResponse?.data?.workout_id;
 
       if (!workoutId) {
+        console.error("Resposta da criação do treino:", workoutResponse?.data);
         throw new Error("Não foi possível obter o ID do treino criado.");
       }
 
-      const workoutItemPayload = {
-        workout_id: Number(workoutId),
-        exercise_id: Number(form.exercise_id),
-        day_of_week: Number(form.day_of_week),
-        series: form.series ? Number(form.series) : null,
-        repetitions: form.repetitions ? Number(form.repetitions) : null,
-        weight_load: form.weight_load ? Number(form.weight_load) : null,
-        duration_time: form.duration_time ? Number(form.duration_time) : null,
-        rest_time: form.rest_time ? Number(form.rest_time) : null,
-        send_notification: form.send_notification,
-      };
+      for (const item of items) {
+        const workoutItemPayload = {
+          workout_id: Number(workoutId),
+          exercise_id: Number(item.exercise_id),
+          day_of_week: Number(item.day_of_week),
+          series: item.series ? Number(item.series) : null,
+          repetitions: item.repetitions ? Number(item.repetitions) : null,
+          weight_load: item.weight_load ? Number(item.weight_load) : null,
+          duration_time: item.duration_time ? Number(item.duration_time) : null,
+          rest_time: item.rest_time ? Number(item.rest_time) : null,
+          send_notification: item.send_notification,
+        };
 
-      await api.post("/educators/workout-items", workoutItemPayload);
+        await api.post("/educators/workout-items", workoutItemPayload);
+      }
 
       alert("Treino cadastrado com sucesso!");
       nav("/treinos");
     } catch (error) {
       console.error("Erro ao cadastrar treino:", error);
       console.error("Resposta backend:", error.response?.data);
-      alert("Não foi possível cadastrar o treino.");
+
+      const apiMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Não foi possível cadastrar o treino.";
+
+      alert(apiMessage);
     } finally {
       setLoading(false);
     }
@@ -167,23 +241,42 @@ export default function WorkoutCreate() {
     return type.workout_type ?? type.name ?? "Tipo";
   }
 
-  return (
-    <div className="min-h-screen px-8 py-6">
-      <div className="mx-auto max-w-5xl">
-        <h1 className="mb-8 text-center font-serif text-[44px] text-[#2f2f2f]">
-          CADASTRO DE TREINOS
-        </h1>
+  function getExerciseId(exercise) {
+    return exercise.exercise_id ?? exercise.id;
+  }
 
-        <form
-          onSubmit={handleSubmit}
-          className="rounded-[16px] bg-[#d9d9d9] px-12 py-10 shadow-sm"
-        >
-          <div className="grid grid-cols-1 gap-x-14 gap-y-5 md:grid-cols-2">
+  function getExerciseName(exercise) {
+    return exercise.exercise ?? exercise.name ?? "Exercício";
+  }
+
+  function getExerciseById(exerciseId) {
+    return exercises.find(
+      (exercise) => String(getExerciseId(exercise)) === String(exerciseId)
+    );
+  }
+
+  if (loadingOptions) {
+    return (
+      <div className="bg-sf-panel rounded-md shadow-soft p-6 text-center text-base font-serif">
+        Carregando...
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <h1 className="text-center font-serif text-4xl uppercase tracking-wide mb-4">
+        Cadastro de Treinos
+      </h1>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="bg-sf-panel rounded-md shadow-soft p-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Field label="Paciente">
               <select
                 value={form.patient_id}
                 onChange={(e) => setField("patient_id", e.target.value)}
-                className="w-full h-10 rounded-md px-3 outline-none bg-white"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
                 required
                 disabled={loadingOptions}
               >
@@ -205,7 +298,7 @@ export default function WorkoutCreate() {
               <select
                 value={form.workout_type_id}
                 onChange={(e) => setField("workout_type_id", e.target.value)}
-                className="w-full h-10 rounded-md px-3 outline-none bg-white"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
                 disabled={loadingOptions}
               >
                 <option value="">
@@ -221,118 +314,15 @@ export default function WorkoutCreate() {
                 ))}
               </select>
             </Field>
-
-            <Field label="Exercício">
-              <select
-                value={form.exercise_id}
-                onChange={(e) => setField("exercise_id", e.target.value)}
-                className="w-full h-10 rounded-md px-3 outline-none bg-white"
-                required
-                disabled={loadingOptions}
-              >
-                <option value="">
-                  {loadingOptions ? "Carregando..." : "Selecione"}
-                </option>
-                {exercises.map((exercise) => (
-                  <option
-                    key={exercise.exercise_id ?? exercise.id}
-                    value={exercise.exercise_id ?? exercise.id}
-                  >
-                    {exercise.exercise}
-                  </option>
-                ))}
-              </select>
-            </Field>
-
-            <Field label="Séries">
-              <input
-                type="number"
-                min="1"
-                value={form.series}
-                onChange={(e) => setField("series", e.target.value)}
-                className="w-full h-10 rounded-md px-3 outline-none bg-white"
-              />
-            </Field>
-
-            <Field label="Repetições">
-              <input
-                type="number"
-                min="1"
-                value={form.repetitions}
-                onChange={(e) => setField("repetitions", e.target.value)}
-                className="w-full h-10 rounded-md px-3 outline-none bg-white"
-                
-              />
-            </Field>
-
-            <Field label="Carga">
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={form.weight_load}
-                onChange={(e) => setField("weight_load", e.target.value)}
-                className="w-full h-10 rounded-md px-3 outline-none bg-white"
-                placeholder="Ex: 20"
-              />
-            </Field>
-
-            <Field label="Tempo de Descanso">
-              <input
-                type="number"
-                min="0"
-                value={form.rest_time}
-                onChange={(e) => setField("rest_time", e.target.value)}
-                className="w-full h-10 rounded-md px-3 outline-none bg-white"
-                placeholder="Em segundos"
-              />
-            </Field>
-
-            <Field label="Grupo Muscular">
-              <input
-                type="text"
-                value={muscleGroupName}
-                className="w-full h-10 rounded-md px-3 outline-none bg-white"
-                readOnly
-                placeholder="Será preenchido pelo exercício"
-              />
-            </Field>
-
-            <Field label="Duração / Tempo">
-              <input
-                type="number"
-                min="0"
-                value={form.duration_time}
-                onChange={(e) => setField("duration_time", e.target.value)}
-                className="w-full h-10 rounded-md px-3 outline-none bg-white"
-                placeholder="Em minutos"
-              />
-            </Field>
-
-            <Field label="Dia da Semana">
-              <select
-                value={form.day_of_week}
-                onChange={(e) => setField("day_of_week", e.target.value)}
-                className="w-full h-10 rounded-md px-3 outline-none bg-white"
-              >
-                <option value="1">Segunda</option>
-                <option value="2">Terça</option>
-                <option value="3">Quarta</option>
-                <option value="4">Quinta</option>
-                <option value="5">Sexta</option>
-                <option value="6">Sábado</option>
-                <option value="7">Domingo</option>
-              </select>
-            </Field>
           </div>
 
-          <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 pt-5 md:grid-cols-3">
             <Field label="Início do Treino">
               <input
                 type="date"
                 value={form.start_date}
                 onChange={(e) => setField("start_date", e.target.value)}
-                className="w-full h-10 rounded-md px-3 outline-none bg-white"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
                 required
               />
             </Field>
@@ -342,7 +332,7 @@ export default function WorkoutCreate() {
                 type="date"
                 value={form.end_date}
                 onChange={(e) => setField("end_date", e.target.value)}
-                className="w-full h-10 rounded-md px-3 outline-none bg-white"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
               />
             </Field>
 
@@ -351,55 +341,220 @@ export default function WorkoutCreate() {
                 type="date"
                 value={form.finalized_at}
                 onChange={(e) => setField("finalized_at", e.target.value)}
-                className="w-full h-10 rounded-md px-3 outline-none bg-white"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
               />
             </Field>
           </div>
+        </div>
 
-          <div className="mt-8 max-w-md">
-            <Field label="Link:">
-              <input
-                type="text"
-                value={exerciseLink}
-                className="w-full h-10 rounded-md px-3 outline-none bg-white"
-                readOnly
-                placeholder="Link do exercício"
-              />
-            </Field>
+        <div className="bg-sf-panel rounded-md shadow-soft p-6">
+          <div className="space-y-6">
+            {items.map((item, index) => {
+              const selectedExercise = getExerciseById(item.exercise_id);
+              const exerciseLink = selectedExercise?.link_exercise ?? "";
+              const muscleGroupName =
+                selectedExercise?.muscle_group_name ??
+                selectedExercise?.muscle_group?.name ??
+                "";
+
+              return (
+                <div
+                  key={index}
+                  className="border-b border-gray-300 pb-6 last:border-b-0"
+                >
+                  <div className="mb-4">
+                    <h2 className="font-serif text-xl">
+                      Exercício {index + 1}
+                    </h2>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <Field label="Exercício">
+                      <select
+                        value={item.exercise_id}
+                        onChange={(e) =>
+                          updateItem(index, "exercise_id", e.target.value)
+                        }
+                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
+                        required
+                      >
+                        <option value="">Selecione</option>
+                        {exercises.map((exercise) => (
+                          <option
+                            key={getExerciseId(exercise)}
+                            value={getExerciseId(exercise)}
+                          >
+                            {getExerciseName(exercise)}
+                          </option>
+                        ))}
+                      </select>
+                    </Field>
+
+                    <Field label="Séries">
+                      <input
+                        type="number"
+                        min="1"
+                        value={item.series}
+                        onChange={(e) =>
+                          updateItem(index, "series", e.target.value)
+                        }
+                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
+                      />
+                    </Field>
+
+                    <Field label="Repetições">
+                      <input
+                        type="number"
+                        min="1"
+                        value={item.repetitions}
+                        onChange={(e) =>
+                          updateItem(index, "repetitions", e.target.value)
+                        }
+                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
+                      />
+                    </Field>
+
+                    <Field label="Carga">
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={item.weight_load}
+                        onChange={(e) =>
+                          updateItem(index, "weight_load", e.target.value)
+                        }
+                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
+                        placeholder="Ex: 20"
+                      />
+                    </Field>
+
+                    <Field label="Tempo de Descanso">
+                      <input
+                        type="number"
+                        min="0"
+                        value={item.rest_time}
+                        onChange={(e) =>
+                          updateItem(index, "rest_time", e.target.value)
+                        }
+                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
+                        placeholder="Em segundos"
+                      />
+                    </Field>
+
+                    <Field label="Grupo Muscular">
+                      <input
+                        type="text"
+                        value={muscleGroupName}
+                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
+                        readOnly
+                        placeholder="Será preenchido pelo exercício"
+                      />
+                    </Field>
+
+                    <Field label="Duração / Tempo">
+                      <input
+                        type="number"
+                        min="0"
+                        value={item.duration_time}
+                        onChange={(e) =>
+                          updateItem(index, "duration_time", e.target.value)
+                        }
+                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
+                        placeholder="Em minutos"
+                      />
+                    </Field>
+
+                    <Field label="Dia da Semana">
+                      <select
+                        value={item.day_of_week}
+                        onChange={(e) =>
+                          updateItem(index, "day_of_week", e.target.value)
+                        }
+                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
+                      >
+                        <option value="1">Segunda</option>
+                        <option value="2">Terça</option>
+                        <option value="3">Quarta</option>
+                        <option value="4">Quinta</option>
+                        <option value="5">Sexta</option>
+                        <option value="6">Sábado</option>
+                        <option value="7">Domingo</option>
+                      </select>
+                    </Field>
+
+                    <div className="md:col-span-2">
+                      <Field label="Link">
+                        <input
+                          type="text"
+                          value={exerciseLink}
+                          className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
+                          readOnly
+                          placeholder="Link do exercício"
+                        />
+                      </Field>
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label className="text-base font-serif">
+                        <input
+                          type="checkbox"
+                          checked={item.send_notification}
+                          onChange={(e) =>
+                            updateItem(
+                              index,
+                              "send_notification",
+                              e.target.checked
+                            )
+                          }
+                          className="mr-2 h-4 w-4"
+                        />
+                        Enviar notificação ao paciente
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end pt-4">
+                    <button
+                      type="button"
+                      onClick={() => removeItem(index)}
+                      className="rounded-md border border-red-500 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition"
+                    >
+                      Remover item
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
-          <div className="mt-6">
-            <label className="flex items-center gap-2 text-[16px] text-[#2f2f2f]">
-              <input
-                type="checkbox"
-                checked={form.send_notification}
-                onChange={(e) =>
-                  setField("send_notification", e.target.checked)
-                }
-              />
-              Enviar notificação ao paciente
-            </label>
-          </div>
+          <button
+            type="button"
+            onClick={addItem}
+            className="mt-4 flex h-10 w-10 items-center justify-center rounded-full bg-sf-greenDark text-xl text-white hover:bg-sf-green"
+            title="Adicionar item"
+          >
+            +
+          </button>
 
-          <div className="mt-16 flex flex-col items-center justify-center gap-4 md:flex-row md:justify-between">
+          <div className="flex flex-col justify-center gap-3 pt-8 md:flex-row md:justify-between">
             <button
               type="button"
               onClick={handleCancel}
-              className="h-[40px] w-full max-w-[320px] rounded-[5px] border border-[#59b96d] bg-transparent text-[18px] text-[#3ca654] transition hover:bg-[#eef9f0]"
+              className="w-full rounded-xl border border-sf-green text-sf-greenDark px-6 py-2 text-base md:w-80"
             >
               Cancelar
             </button>
 
             <button
               type="submit"
-              disabled={loading || loadingOptions}              
-              className="h-[40px] w-full max-w-[320px] hover:bg-sf-btnBlue rounded-[5px] bg-[#8bc79a] text-[18px] text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={loading || loadingOptions}
+              className="w-full rounded-xl bg-sf-greenDark text-white px-6 py-2 text-base hover:bg-sf-green disabled:cursor-not-allowed disabled:opacity-60 md:w-80"
             >
               {loading ? "Cadastrando..." : "Cadastrar"}
             </button>
           </div>
-        </form>
-      </div>
+        </div>
+      </form>
     </div>
   );
 }
@@ -407,9 +562,7 @@ export default function WorkoutCreate() {
 function Field({ label, children }) {
   return (
     <label className="block">
-      <span className="mb-1 block font-serif text-[18px] text-[#2f2f2f]">
-        {label}
-      </span>
+      <span className="mb-1 block text-base font-serif">{label}</span>
       {children}
     </label>
   );

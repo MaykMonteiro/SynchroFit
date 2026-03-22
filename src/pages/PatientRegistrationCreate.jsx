@@ -68,26 +68,26 @@ export default function PatientRegistrationCreate() {
     }));
   }, [patient]);
 
-    function setField(field, value) {
-        setForm((prev) => {
-            const next = {
-            ...prev,
-            [field]: value,
-            };
+  function setField(field, value) {
+    setForm((prev) => {
+      const next = {
+        ...prev,
+        [field]: value,
+      };
 
-            if (field === "start_date" || field === "plan_description") {
-            const calculatedEndDate = calculateEndDate(
-                field === "start_date" ? value : next.start_date,
-                field === "plan_description" ? value : next.plan_description
-            );
+      if (field === "start_date" || field === "plan_description") {
+        const calculatedEndDate = calculateEndDate(
+          field === "start_date" ? value : next.start_date,
+          field === "plan_description" ? value : next.plan_description
+        );
 
-            next.end_date = calculatedEndDate;
-            next.finalized_at = calculatedEndDate;
-            }
+        next.end_date = calculatedEndDate;
+        next.finalized_at = calculatedEndDate;
+      }
 
-            return next;
-        });
-    }
+      return next;
+    });
+  }
 
   async function salvar(e) {
     e.preventDefault();
@@ -116,13 +116,13 @@ export default function PatientRegistrationCreate() {
 
   return (
     <div>
-      <h1 className="mb-6 text-center font-serif text-3xl uppercase tracking-wide text-[#2f2f2f]">
+      <h1 className="text-center font-serif text-4xl uppercase tracking-wide mb-4">
         Matrícula do Paciente
       </h1>
 
-      <div className="mx-auto max-w-5xl rounded-md bg-sf-panel p-6 shadow-soft">
+      <div className="bg-sf-panel rounded-md shadow-soft p-6">
         {error ? (
-          <div className="mb-4 rounded bg-red-100 p-2 text-[12px] text-red-700">
+          <div className="mb-4 rounded-md bg-red-100 px-3 py-2 text-sm text-red-700">
             {error}
           </div>
         ) : null}
@@ -130,25 +130,23 @@ export default function PatientRegistrationCreate() {
         {loading && !patient ? (
           <div className="text-[12px]">Carregando...</div>
         ) : (
-          <form onSubmit={salvar}>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6">
+          <form onSubmit={salvar} className="space-y-5">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <div className="md:col-span-2">
-                <label className="mb-1 block text-[12px] font-semibold text-[#4a4a4a]">
-                  Nome
-                </label>
+                <label className="mb-1 block text-base font-serif">Nome</label>
                 <input
-                  className="h-7 w-full rounded bg-white px-2 text-[12px]"
+                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
                   value={form.name}
                   readOnly
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-[12px] font-semibold text-[#4a4a4a]">
+                <label className="mb-1 block text-base font-serif">
                   Plano de Acompanhamento
                 </label>
                 <select
-                  className="h-7 w-full rounded bg-white px-2 text-[12px]"
+                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
                   value={form.plan_description}
                   onChange={(e) => setField("plan_description", e.target.value)}
                   required
@@ -161,12 +159,12 @@ export default function PatientRegistrationCreate() {
               </div>
 
               <div>
-                <label className="mb-1 block text-[12px] font-semibold text-[#4a4a4a]">
+                <label className="mb-1 block text-base font-serif">
                   Início do Acompanhamento
                 </label>
                 <input
                   type="date"
-                  className="h-7 w-full rounded bg-white px-2 text-[12px]"
+                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
                   value={form.start_date}
                   onChange={(e) => setField("start_date", e.target.value)}
                   required
@@ -174,52 +172,35 @@ export default function PatientRegistrationCreate() {
               </div>
 
               <div>
-                <label className="mb-1 block text-[12px] font-semibold text-[#4a4a4a]">
+                <label className="mb-1 block text-base font-serif">
                   Fim do Acompanhamento
                 </label>
                 <input
                   type="date"
-                  className="h-7 w-full rounded bg-white px-2 text-[12px]"
+                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
                   value={form.end_date}
                   readOnly
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-[12px] font-semibold text-[#4a4a4a]">
+                <label className="mb-1 block text-base font-serif">
                   Finalização do Acompanhamento
                 </label>
                 <input
                   type="date"
-                  className="h-7 w-full rounded bg-white px-2 text-[12px]"
+                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
                   value={form.finalized_at}
                   onChange={(e) => setField("finalized_at", e.target.value)}
                 />
               </div>
             </div>
 
-            <div
-              style={{
-                marginTop: "40px",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: "24px",
-              }}
-            >
+            <div className="flex flex-col justify-center gap-3 pt-4 md:flex-row">
               <button
                 type="button"
                 onClick={() => nav("/pacientes")}
-                style={{
-                  width: "190px",
-                  height: "42px",
-                  borderRadius: "6px",
-                  border: "1px solid #2f7d57",
-                  color: "#2f7d57",
-                  backgroundColor: "transparent",
-                  fontSize: "14px",
-                  cursor: "pointer",
-                }}
+                className="w-full rounded-xl border border-sf-green text-sf-greenDark px-6 py-2 text-base md:w-80"
                 disabled={saving}
               >
                 Cancelar
@@ -227,16 +208,7 @@ export default function PatientRegistrationCreate() {
 
               <button
                 type="submit"
-                style={{
-                  width: "190px",
-                  height: "42px",
-                  borderRadius: "6px",
-                  border: "none",
-                  backgroundColor: "#2f7d57",
-                  color: "#fff",
-                  fontSize: "14px",
-                  cursor: "pointer",
-                }}
+                className="w-full rounded-xl bg-sf-greenDark text-white px-6 py-2 text-base hover:bg-sf-green disabled:opacity-60 md:w-80"
                 disabled={saving}
               >
                 {saving ? "Salvando..." : "Salvar"}

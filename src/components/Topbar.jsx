@@ -1,66 +1,329 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Bell } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext.jsx";
+import { api } from "../services/api";
+
+const READ_NOTIFICATIONS_KEY = "readNotifications";
+
+function getStoredReadNotifications() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(READ_NOTIFICATIONS_KEY) ?? "[]");
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveStoredReadNotifications(ids) {
+  localStorage.setItem(READ_NOTIFICATIONS_KEY, JSON.stringify(ids));
+}
+
+function formatDateBR(dateString) {
+  if (!dateString) return "-";
+
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return date.toLocaleString("pt-BR");
+}
+
+function buildWorkoutNotifications(items, readNotifications) {
+  return items.map((item) => {
+    const id = `workout-${item.workout_feedback_id ?? item.id}`;
+
+    return {
+      id,
+      type: "workout",
+      title: "Novo feedback de treino",
+      message: `O paciente ${
+        item.patient_name ?? "Paciente"
+      } enviou um novo feedback de treino.`,
+      created_at: item.created_at,
+      read: readNotifications.includes(id),
+    };
+  });
+}
+
+function buildDietNotifications(items, readNotifications) {
+  return items.map((item) => {
+    const id = `diet-${item.diet_feedback_id ?? item.id}`;
+
+    return {
+      id,
+      type: "diet",
+      title: "Novo feedback de dieta",
+      message: `O paciente ${
+        item.patient_name ?? "Paciente"
+      } enviou um novo feedback de dieta.`,
+      created_at: item.created_at,
+      read: readNotifications.includes(id),
+    };
+  });
+}
 
 export default function Topbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const [open, setOpen] = useState(false);
-  const menuRef = useRef(null);
+  const [openUserMenu, setOpenUserMenu] = useState(false);
+  const [openNotifications, setOpenNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [loadingNotifications, setLoadingNotifications] = useState(false);
+
+  const userMenuRef = useRef(null);
+  const notificationRef = useRef(null);
+
+  const unreadCount = useMemo(() => {
+    return notifications.filter((item) => !item.read).length;
+  }, [notifications]);
+
+  const fetchNotifications = useCallback(async () => {
+    try {
+      setLoadingNotifications(true);
+
+      const [workoutResult, dietResult] = await Promise.allSettled([
+        api.get("/educators/notifications/workout-feedback"),
+        api.get("/educators/notifications/diet-feedback"),
+      ]);
+
+      const workoutItems =
+        workoutResult.status === "fulfilled"
+          ? workoutResult.value.data?.data ?? []
+          : [];
+
+      const dietItems =
+        dietResult.status === "fulfilled"
+          ? dietResult.value.data?.data ?? []
+          : [];
+
+      const readNotifications = getStoredReadNotifications();
+
+      const formattedWorkout = buildWorkoutNotifications(
+        workoutItems,
+        readNotifications
+      );
+
+      const formattedDiet = buildDietNotifications(
+        dietItems,
+        readNotifications
+      );
+
+      const allNotifications = [...formattedWorkout, ...formattedDiet].sort(
+        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+      );
+
+      setNotifications(allNotifications);
+    } catch (error) {
+      console.error("Erro ao buscar notificações:", error);
+      setNotifications([]);
+    } finally {
+      setLoadingNotifications(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    fetchNotifications();
+  }, [user, fetchNotifications]);
 
   useEffect(() => {
     function handleClickOutside(event) {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setOpen(false);
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target)
+      ) {
+        setOpenUserMenu(false);
+      }
+
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target)
+      ) {
+        setOpenNotifications(false);
       }
     }
 
     document.addEventListener("mousedown", handleClickOutside);
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
   function handleSettings() {
-    setOpen(false);
+    setOpenUserMenu(false);
     navigate("/settings");
   }
 
   function handleLogout() {
-    setOpen(false);
+    setOpenUserMenu(false);
     logout();
     navigate("/");
   }
 
+  function toggleUserMenu() {
+    setOpenUserMenu((prev) => !prev);
+    setOpenNotifications(false);
+  }
+
+  async function toggleNotifications() {
+    const nextState = !openNotifications;
+
+    setOpenNotifications(nextState);
+    setOpenUserMenu(false);
+
+    if (nextState) {
+      await fetchNotifications();
+    }
+  }
+
+  function markAsRead(id) {
+    const stored = getStoredReadNotifications();
+
+    if (!stored.includes(id)) {
+      saveStoredReadNotifications([...stored, id]);
+    }
+
+    setNotifications((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, read: true } : item
+      )
+    );
+  }
+
+  function markAllAsRead() {
+    const ids = notifications.map((item) => item.id);
+    const stored = getStoredReadNotifications();
+    const merged = Array.from(new Set([...stored, ...ids]));
+
+    saveStoredReadNotifications(merged);
+
+    setNotifications((prev) =>
+      prev.map((item) => ({ ...item, read: true }))
+    );
+  }
+
   return (
-    <div className="h-12 flex items-center justify-end px-6">
-      <div className="relative" ref={menuRef}>
+    <header className="h-14 flex items-center justify-end gap-3 px-6 bg-white">
+      <div className="relative" ref={notificationRef}>
         <button
-          onClick={() => setOpen((prev) => !prev)}
-          className="flex items-center gap-2 rounded-full bg-sf-green text-textBlack px-3 py-1 hover:opacity-90"
+          onClick={toggleNotifications}
+          type="button"
+          className="relative flex items-center justify-center w-10 h-10 rounded-full bg-sf-green text-sf-textBlack border border-black/10 hover:bg-sf-green/90 transition"
         >
-          <span className="text-md">{user?.name ?? "USUÁRIO"}</span>
+          <Bell size={18} />
+
+          {unreadCount > 0 && (
+            <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </span>
+          )}
         </button>
 
-        {open && (
-          <div className="absolute right-0 mt-2 w-44 rounded-lg border border-gray-200 bg-white shadow-lg overflow-hidden z-50">
+        {openNotifications && (
+          <div className="absolute right-0 mt-2 w-80 rounded-xl border border-black/10 bg-white shadow-md overflow-hidden z-50">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-black/10">
+              <span className="text-sm font-semibold text-black">
+                Notificações
+              </span>
+
+              {notifications.length > 0 && (
+                <button
+                  type="button"
+                  onClick={markAllAsRead}
+                  className="text-xs text-sf-textBlack hover:underline"
+                >
+                  Marcar todas como lidas
+                </button>
+              )}
+            </div>
+
+            <div className="max-h-80 overflow-y-auto">
+              {loadingNotifications ? (
+                <div className="px-4 py-6 text-sm text-gray-500 text-center">
+                  Carregando notificações...
+                </div>
+              ) : notifications.length === 0 ? (
+                <div className="px-4 py-6 text-sm text-gray-500 text-center">
+                  Nenhuma notificação no momento.
+                </div>
+              ) : (
+                notifications.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => markAsRead(item.id)}
+                    className={`w-full text-left px-4 py-3 border-b border-black/5 transition hover:bg-black/5 ${
+                      !item.read ? "bg-green-50" : "bg-white"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-black">
+                          {item.title}
+                        </p>
+
+                        <p className="text-xs text-gray-600 mt-1">
+                          {item.message}
+                        </p>
+
+                        <p className="text-[11px] text-gray-400 mt-2">
+                          {formatDateBR(item.created_at)}
+                        </p>
+                      </div>
+
+                      {!item.read && (
+                        <span className="mt-1 w-2.5 h-2.5 rounded-full bg-red-500 shrink-0" />
+                      )}
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="relative" ref={userMenuRef}>
+        <button
+          onClick={toggleUserMenu}
+          type="button"
+          className="flex items-center gap-2 rounded-full bg-sf-green text-sf-textBlack px-4 py-2 text-sm font-medium border border-black/10 hover:bg-sf-green/90 transition"
+        >
+          <span className="truncate max-w-[160px]">
+            {user?.name ?? "USUÁRIO"}
+          </span>
+
+          <span
+            className={`text-[10px] transition-transform duration-200 ${
+              openUserMenu ? "rotate-180" : ""
+            }`}
+          >
+            ▼
+          </span>
+        </button>
+
+        {openUserMenu && (
+          <div className="absolute right-0 mt-2 w-44 rounded-xl border border-black/10 bg-white shadow-md overflow-hidden z-50">
             <button
               onClick={handleSettings}
-              className="w-full px-4 py-2 text-left text-sm text-black hover:bg-gray-100"
+              type="button"
+              className="w-full px-4 py-2.5 text-left text-sm text-black transition-all duration-200 hover:bg-black/10 hover:text-black"
             >
               Configurações
             </button>
 
             <button
               onClick={handleLogout}
-              className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100"
+              type="button"
+              className="w-full px-4 py-2.5 text-left text-sm text-red-600 transition-all duration-200 hover:bg-red-100 hover:text-red-700"
             >
               Sair
             </button>
           </div>
         )}
       </div>
-    </div>
+    </header>
   );
 }

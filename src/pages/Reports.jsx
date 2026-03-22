@@ -15,9 +15,9 @@ import { api } from "../services/api";
 function ChartCard({ title, data, unit = "" }) {
   return (
     <div>
-      <h3 className="font-serif text-[18px] mb-2">{title}</h3>
+      <h3 className="mb-2 text-base font-serif">{title}</h3>
 
-      <div className="bg-white rounded-md p-4 h-[220px]">
+      <div className="h-[220px] rounded-md border border-gray-300 bg-white p-4">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} barSize={34}>
             <CartesianGrid vertical={false} strokeDasharray="3 3" />
@@ -138,21 +138,19 @@ export default function Reports() {
   }, [selectedData, selectedType]);
 
   return (
-    <div className="w-full">
-      <h1 className="text-center font-serif text-5xl uppercase tracking-wide mb-8">
-        RELATÓRIOS
+    <div>
+      <h1 className="text-center font-serif text-4xl uppercase tracking-wide mb-4">
+        Relatórios
       </h1>
 
-      <div className="bg-[#d9d9d9] rounded-2xl p-6 md:p-8 max-w-5xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div className="bg-sf-panel rounded-md shadow-soft p-6">
+        <div className="grid grid-cols-1 gap-4 mb-6 md:grid-cols-2">
           <div>
-            <label className="block font-serif text-[18px] mb-2">
-              Paciente
-            </label>
+            <label className="mb-1 block text-base font-serif">Paciente</label>
             <select
               value={selectedPatient}
               onChange={(e) => setSelectedPatient(e.target.value)}
-              className="w-full bg-white rounded-md px-4 py-3 outline-none"
+              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
               disabled={patients.length === 0}
             >
               {patients.length === 0 ? (
@@ -170,13 +168,11 @@ export default function Reports() {
           </div>
 
           <div>
-            <label className="block font-serif text-[18px] mb-2">
-              Tipo
-            </label>
+            <label className="mb-1 block text-base font-serif">Tipo</label>
             <select
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value)}
-              className="w-full bg-white rounded-md px-4 py-3 outline-none"
+              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
             >
               <option value="diet">Dieta</option>
               <option value="workout">Treino</option>
@@ -184,7 +180,7 @@ export default function Reports() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {chartConfig.map((chart) => (
             <ChartCard
               key={chart.title}

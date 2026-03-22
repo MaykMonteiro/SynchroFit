@@ -62,83 +62,82 @@ export default function Settings() {
 
   return (
     <div>
-      <h1 className="text-center font-serif text-4xl md:text-5xl uppercase tracking-wide mb-8">
+      <h1 className="text-center font-serif text-4xl uppercase tracking-wide mb-4">
         Configurações
       </h1>
 
-      <form
-        onSubmit={handleSubmit}
-        className="bg-sf-panel rounded-2xl shadow-soft p-8 max-w-5xl mx-auto"
-      >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
-          <div>
-            <label className="block font-serif text-[18px] mb-2">
-              Nome Completo
-            </label>
-            <input
-              type="text"
-              value={form.name}
-              onChange={(e) => setField("name", e.target.value)}
-              className="w-full bg-white rounded-md px-4 py-3 outline-none"
-            />
+      <div className="bg-sf-panel rounded-md shadow-soft p-6">
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-base font-serif">
+                Nome Completo
+              </label>
+              <input
+                type="text"
+                value={form.name}
+                onChange={(e) => setField("name", e.target.value)}
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-base font-serif">
+                Telefone
+              </label>
+              <input
+                type="text"
+                value={form.phone}
+                onChange={(e) => setField("phone", e.target.value)}
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-base font-serif">
+                E-mail
+              </label>
+              <input
+                type="email"
+                value={form.email}
+                onChange={(e) => setField("email", e.target.value)}
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-base font-serif">
+                Senha
+              </label>
+              <input
+                type="password"
+                value={form.password}
+                onChange={(e) => setField("password", e.target.value)}
+                placeholder="Digite apenas se quiser alterar"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
+              />
+            </div>
           </div>
 
-          <div>
-            <label className="block font-serif text-[18px] mb-2">
-              Telefone
-            </label>
-            <input
-              type="text"
-              value={form.phone}
-              onChange={(e) => setField("phone", e.target.value)}
-              className="w-full bg-white rounded-md px-4 py-3 outline-none"
-            />
+          <div className="flex flex-col justify-center gap-3 pt-3 md:flex-row">
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="w-full rounded-xl border border-sf-green text-sf-greenDark px-6 py-2 text-base md:w-80"
+            >
+              Cancelar
+            </button>
+
+            <button
+              type="submit"
+              disabled={saving}
+              className="w-full rounded-xl bg-blue-500 text-white px-6 py-2 text-base hover:bg-sf-green disabled:opacity-60 md:w-80"
+            >
+              {saving ? "Atualizando..." : "ATUALIZAR"}
+            </button>
           </div>
-
-          <div>
-            <label className="block font-serif text-[18px] mb-2">
-              E-mail
-            </label>
-            <input
-              type="email"
-              value={form.email}
-              onChange={(e) => setField("email", e.target.value)}
-              className="w-full bg-white rounded-md px-4 py-3 outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block font-serif text-[18px] mb-2">
-              Senha
-            </label>
-            <input
-              type="password"
-              value={form.password}
-              onChange={(e) => setField("password", e.target.value)}
-              placeholder="Digite apenas se quiser alterar"
-              className="w-full bg-white rounded-md px-4 py-3 outline-none"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mt-16">
-          <button
-            type="button"
-            onClick={handleCancel}
-            className="border border-green-600 text-green-600 rounded-md py-3 font-serif text-2xl"
-          >
-            Cancelar
-          </button>
-
-          <button
-            type="submit"
-            disabled={saving}
-            className="bg-blue-500 text-white rounded-md py-3 font-serif text-2xl disabled:opacity-70"
-          >
-            {saving ? "Atualizando..." : "ATUALIZAR"}
-          </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }

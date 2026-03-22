@@ -60,20 +60,18 @@ export default function Workout() {
     const workoutId = String(workout.workout_id ?? workout.id);
 
     const confirmDelete = window.confirm(
-      "Tem certeza que deseja desativar este treino?"
+      "Tem certeza que deseja excluir este treino?"
     );
 
     if (!confirmDelete) return;
 
     try {
-     
       await api.delete(`/educators/workouts/${workoutId}`);
-  
-      console.warn("Não foi possível atualizar is_active na API:", err);
 
       alert("Treino excluído com sucesso!");
+      await fetchWorkouts();
     } catch (error) {
-      console.error("Erro ao ocultar treino:", error);
+      console.error("Erro ao excluir treino:", error);
       alert("Não foi possível excluir o treino.");
     }
   }

@@ -18,55 +18,53 @@ export default function FeedbackView() {
 
   return (
     <div>
-      <h1 className="text-center font-serif text-4xl uppercase tracking-wide mb-6">
+      <h1 className="text-center font-serif text-4xl uppercase tracking-wide mb-4">
         Feedback
       </h1>
 
-      <section className="bg-sf-panel rounded-md shadow-soft p-8 min-h-[520px] max-w-5xl mx-auto">
-        <div className="grid grid-cols-2 gap-x-10 gap-y-6">
+      <section className="bg-sf-panel rounded-md shadow-soft p-6">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
-            <label className="block text-[18px] text-[#333] mb-1">
+            <label className="mb-1 block text-base font-serif">
               Nome Paciente
             </label>
-            <div className="w-full h-[42px] bg-white rounded-md px-3 flex items-center text-[16px] text-[#333]">
+            <div className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800">
               {feedback.patient_name || feedback.name || "-"}
             </div>
           </div>
 
           <div>
-            <label className="block text-[18px] text-[#333] mb-1">
+            <label className="mb-1 block text-base font-serif">
               Dieta / Treino
             </label>
-            <div className="w-full h-[42px] bg-white rounded-md px-3 flex items-center text-[16px] text-[#333]">
+            <div className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800">
               {feedback.type || feedback.feedback_type || "-"}
             </div>
           </div>
 
-          <div className="col-span-2 max-w-[180px]">
-            <label className="block text-[18px] text-[#333] mb-1">
-              Data
-            </label>
-            <div className="w-full h-[42px] bg-white rounded-md px-3 flex items-center text-[16px] text-[#333]">
+          <div className="md:col-span-2 md:max-w-[220px]">
+            <label className="mb-1 block text-base font-serif">Data</label>
+            <div className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800">
               {formatDateBR(feedback.date || feedback.created_at)}
             </div>
           </div>
 
-          <div className="col-span-2">
-            <label className="block text-[18px] text-[#333] mb-1">
+          <div className="md:col-span-2">
+            <label className="mb-1 block text-base font-serif">
               Comentário
             </label>
-            <div className="w-full min-h-[120px] bg-white rounded-md px-3 py-3 text-[16px] text-[#333] whitespace-pre-wrap">
+            <div className="min-h-[120px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 whitespace-pre-wrap">
               {feedback.comment || feedback.comentario || feedback.description || "-"}
             </div>
           </div>
         </div>
 
-        <div className="flex justify-end mt-16">
+        <div className="flex flex-col justify-center gap-3 pt-6 md:flex-row md:justify-end">
           <button
             onClick={() => nav("/feedback")}
-            className="bg-blue-500 hover:bg-blue-600 text-white text-[18px] px-16 py-2 rounded-md min-w-[260px]"
+            className="w-full rounded-xl bg-blue-500 text-white px-6 py-2 text-base hover:bg-sf-green md:w-80"
           >
-            VOLTAR
+            Voltar
           </button>
         </div>
       </section>

@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 import { usePatients } from "../contexts/PatientsContext";
 import { useRegistrations } from "../contexts/PatientRegistrationsContext";
-import "../styles/table.css";
+import { useAuth } from "../contexts/AuthContext.jsx";
+import Table from "../components/Table";
 
 function parseDateString(dateInput) {
   if (!dateInput) return null;
@@ -16,6 +17,7 @@ function parseDateString(dateInput) {
   const dm = /^\s*(\d{1,2})\/(\d{1,2})\s*$/;
 
   let m;
+
   if ((m = s.match(dmY))) {
     const day = Number(m[1]);
     const month = Number(m[2]);
@@ -31,7 +33,12 @@ function parseDateString(dateInput) {
     let year = today.getFullYear();
 
     let candidate = new Date(year, month - 1, day);
-    const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const todayMidnight = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
+
     if (candidate < todayMidnight) {
       year += 1;
       candidate = new Date(year, month - 1, day);
@@ -62,7 +69,11 @@ function getDaysLeft(endDate) {
   if (!end) return null;
 
   const today = new Date();
-  const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const todayMidnight = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate()
+  );
 
   end.setHours(0, 0, 0, 0);
 
@@ -87,58 +98,64 @@ function formatPlan(plan) {
 }
 
 export default function Dashboard() {
+  const { user } = useAuth();
   const { patients = [], loading: loadingPatients } = usePatients();
-  const { registrations = [], loading: loadingRegistrations } = useRegistrations();
+  const { registrations = [], loading: loadingRegistrations } =
+    useRegistrations();
 
   const loading = loadingPatients || loadingRegistrations;
 
   const nearestPatients = useMemo(() => {
+    const activePatients = (Array.isArray(patients) ? patients : []).filter(
+      (patient) => (patient.is_active ?? patient.ativo ?? 1) == 1
+    );
+
     const patientMap = new Map(
-      (Array.isArray(patients) ? patients : []).map((patient) => [
-        String(patient.id),
+      activePatients.map((patient) => [
+        String(patient.id ?? patient.patient_id),
         patient,
       ])
     );
 
     return (Array.isArray(registrations) ? registrations : [])
+      .filter((registration) => {
+        const educatorId =
+          registration.educator_id ??
+          registration.user_id ??
+          registration.educator?.id;
+
+        return String(educatorId) === String(user?.id);
+      })
       .map((registration) => {
         const patientId =
-          registration?.patient_id ||
-          registration?.id_paciente ||
+          registration?.patient_id ??
+          registration?.id_paciente ??
           registration?.patient?.id;
 
         const patient =
           patientMap.get(String(patientId)) || registration?.patient || {};
 
-        const name =
-          patient?.name ||
-          patient?.nome ||
-          "";
-
-        const email =
-          patient?.email ||
-          "";
-
-        const phone =
-          patient?.phone ||
-          patient?.telefone ||
-          "";
+        const name = patient?.name || patient?.nome || "-";
+        const email = patient?.email || "-";
+        const phone = patient?.phone || patient?.telefone || "-";
 
         const plan =
-          registration?.plan_description ||
-          "";
+          registration?.plan_description ??
+          registration?.plan ??
+          registration?.plano ??
+          "-";
 
         const endDate =
-          registration?.end_date ||
-          registration?.data_fim ||
-          registration?.expected_end_date ||
-          registration?.fim_acompanhamento ||
+          registration?.end_date ??
+          registration?.data_fim ??
+          registration?.expected_end_date ??
+          registration?.fim_acompanhamento ??
           registration?.fimAcompanhamento;
 
         const daysLeft = getDaysLeft(endDate);
 
         return {
-          id: registration?.id,
+          id: patient?.id ?? patientId ?? registration?.id,
           name,
           email,
           phone,
@@ -149,84 +166,43 @@ export default function Dashboard() {
       })
       .filter(
         (item) =>
+          item.id &&
           item.endDate &&
           item.daysLeft !== null &&
           item.daysLeft >= 0
       )
       .sort((a, b) => a.daysLeft - b.daysLeft)
       .slice(0, 10);
-  }, [patients, registrations]);
+  }, [patients, registrations, user]);
+
+  const columns = ["NOME", "E-MAIL", "TELEFONE", "PLANO", "DATA"];
+
+  const rows = nearestPatients.map((patient) => [
+    patient.name,
+    patient.email,
+    patient.phone,
+    formatPlan(patient.plan),
+    formatDateBR(patient.endDate),
+  ]);
 
   return (
-    <div className="min-h-screen p-6">
-      <h1 className="mb-10 text-center text-3xl font-serif">
-        BEM VINDO AO SEU GESTOR DE PACIENTES.
+    <div>
+      <h1 className="text-center font-serif text-4xl uppercase tracking-wide mb-4">
+        Bem vindo ao seu gestor de pacientes.
       </h1>
 
-      <div className="mx-auto w-full rounded-md bg-sf-bgGray px-5 py-4">
-        <h2 className="mb-2 text-center text-md font-bold">
-          PACIENTES A VENCER
+      <div className="bg-sf-panel rounded-md shadow-soft p-6">
+        <h2 className="text-center text-lg font-normal mb-4 uppercase tracking-wide">
+          Pacientes a vencer
         </h2>
 
         {loading ? (
-          <p className="py-6 text-center">Carregando...</p>
+          <div className="text-[12px]">Carregando...</div>
+        ) : rows.length > 0 ? (
+          <Table columns={columns} rows={rows} />
         ) : (
-          <div className="overflow-hidden border border-gray-500 bg-white">
-            <table className="table">
-              <thead>
-                <tr className="tr">
-                  <th className="border border-gray-500 px-2 py-1 text-left">NOME</th>
-                  <th className="border border-gray-500 px-2 py-1 text-left">E-MAIL</th>
-                  <th className="border border-gray-500 px-2 py-1 text-left">TELEFONE</th>
-                  <th className="border border-gray-500 px-2 py-1 text-left">PLANO</th>
-                  <th className="border border-gray-500 px-2 py-1 text-left">DATA</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {nearestPatients.length > 0 ? (
-                  nearestPatients.map((patient, index) => (
-                    <tr key={patient.id || index}>
-                      <td className="border border-gray-500 px-2 py-1">
-                        {patient.name}
-                      </td>
-
-                      <td className="border border-gray-500 px-2 py-1">
-                        {patient.email}
-                      </td>
-
-                      <td className="border border-gray-500 px-2 py-1">
-                        {patient.phone}
-                      </td>
-
-                      <td className="border border-gray-500 px-2 py-1">
-                        {formatPlan(patient.plan)}
-                      </td>
-
-                      <td className="border border-gray-500 px-2 py-1">
-                        {formatDateBR(patient.endDate)}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="5" className="border border-gray-500 py-4 text-center">
-                      Nenhum paciente próximo do prazo final.
-                    </td>
-                  </tr>
-                )}
-
-                {Array.from({ length: Math.max(0, 6 - nearestPatients.length) }).map((_, index) => (
-                  <tr key={index}>
-                    <td className="border border-gray-500 py-3"></td>
-                    <td className="border border-gray-500"></td>
-                    <td className="border border-gray-500"></td>
-                    <td className="border border-gray-500"></td>
-                    <td className="border border-gray-500"></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="text-sm text-gray-600 text-center">
+            Nenhum paciente próximo do prazo final.
           </div>
         )}
       </div>

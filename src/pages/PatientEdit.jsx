@@ -13,7 +13,10 @@ export default function PatientEdit() {
   const { patients, loading, fetchPatients, updatePatient } = usePatients();
 
   const patient = useMemo(
-    () => (patients ?? []).find((p) => String(p.id ?? p.patient_id) === String(id)),
+    () =>
+      (patients ?? []).find(
+        (p) => String(p.id ?? p.patient_id) === String(id)
+      ),
     [patients, id]
   );
 
@@ -95,7 +98,7 @@ export default function PatientEdit() {
         <button
           type="button"
           onClick={() => nav("/pacientes")}
-          className="border border-sf-green text-sf-green px-6 py-1 text-[12px] rounded"
+          className="border border-sf-green text-sf-greenDark px-6 py-1 text-[12px] rounded"
         >
           Voltar
         </button>
@@ -105,51 +108,53 @@ export default function PatientEdit() {
 
   return (
     <div>
-      <h1 className="text-center font-serif text-4xl uppercase tracking-wide mb-8">
+      <h1 className="text-center font-serif text-4xl uppercase tracking-wide mb-4">
         Edição de Paciente
       </h1>
 
       <div className="bg-sf-panel rounded-md shadow-soft p-6">
         {error ? (
-          <div className="mb-3 text-base p-2 rounded bg-red-100 text-red-700">
+          <div className="mb-4 rounded-md bg-red-100 px-3 py-2 text-sm text-red-700">
             {error}
           </div>
         ) : null}
 
-        <form onSubmit={salvar} className="space-y-4">
+        <form onSubmit={salvar} className="space-y-5">
           <div>
-            <label className="text-base font-serif">Nome</label>
+            <label className="mb-1 block text-base font-serif">Nome</label>
             <input
-              className="w-full h-7 rounded px-2 text-[12px]"
+              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
               value={form.nome}
               onChange={(e) => setField("nome", e.target.value)}
             />
           </div>
 
           <div>
-            <label className="text-base font-serif">E-mail</label>
+            <label className="mb-1 block text-base font-serif">E-mail</label>
             <input
-              className="w-full h-7 rounded px-2 text-[12px]"
+              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
               value={form.email}
               onChange={(e) => setField("email", e.target.value)}
             />
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div>
-              <label className="text-base font-serif">Nascimento</label>
+              <label className="mb-1 block text-base font-serif">
+                Nascimento
+              </label>
               <input
                 type="date"
-                className="w-full h-7 rounded px-2 text-[12px]"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
                 value={form.nascimento}
                 onChange={(e) => setField("nascimento", e.target.value)}
               />
             </div>
 
             <div>
-              <label className="text-base font-serif">Sexo</label>
+              <label className="mb-1 block text-base font-serif">Sexo</label>
               <select
-                className="w-full h-7 bg-white rounded px-2 text-base"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
                 value={form.sexo}
                 onChange={(e) => setField("sexo", e.target.value)}
               >
@@ -161,9 +166,9 @@ export default function PatientEdit() {
             </div>
 
             <div>
-              <label className="text-base font-serif">Telefone</label>
+              <label className="mb-1 block text-base font-serif">Telefone</label>
               <input
-                className="w-full h-7 rounded px-2 text-base"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
                 value={form.telefone}
                 onChange={(e) => setField("telefone", e.target.value)}
               />
@@ -171,28 +176,29 @@ export default function PatientEdit() {
           </div>
 
           <div>
-            <label className="text-base font-serif">Alergias</label>
+            <label className="mb-1 block text-base font-serif">Alergias</label>
             <textarea
-              className="w-full rounded px-2 py-2 text-base"
+              className="min-h-[100px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
               value={form.alergias}
               onChange={(e) => setField("alergias", e.target.value)}
             />
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 pt-1">
             <label className="text-base font-serif">Inativo / Ativo</label>
             <input
               type="checkbox"
               checked={form.ativo}
               onChange={(e) => setField("ativo", e.target.checked)}
+              className="h-4 w-4"
             />
           </div>
 
-          <div className="flex justify-center gap-4 pt-2">
+          <div className="flex flex-col justify-center gap-3 pt-3 md:flex-row">
             <button
               type="button"
               onClick={() => nav("/pacientes")}
-              className="w-80 border border-sf-green text-sf-greenDark px-6 py-1 text-lg rounded"
+              className="w-full rounded-xl border border-sf-green text-sf-greenDark px-6 py-2 text-base md:w-80"
               disabled={saving}
             >
               Cancelar
@@ -200,7 +206,7 @@ export default function PatientEdit() {
 
             <button
               type="submit"
-              className="w-80 bg-sf-green text-white px-6 py-1 text-lg rounded hover:bg-sf-btnBlue disabled:opacity-60"
+              className="w-full rounded-xl bg-sf-greenDark text-white px-6 py-2 text-base hover:bg-sf-green disabled:opacity-60 md:w-80"
               disabled={saving}
             >
               {saving ? "Salvando..." : "Salvar"}
