@@ -4,19 +4,23 @@ import { Bell } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext.jsx";
 import { api } from "../services/api";
 
-const READ_NOTIFICATIONS_KEY = "readNotifications";
+function getReadNotificationsKey(userId) {
+  return `readNotifications_${userId ?? "anonymous"}`;
+}
 
-function getStoredReadNotifications() {
+function getStoredReadNotifications(userId) {
   try {
-    const saved = JSON.parse(localStorage.getItem(READ_NOTIFICATIONS_KEY) ?? "[]");
+    const saved = JSON.parse(
+      localStorage.getItem(getReadNotificationsKey(userId)) ?? "[]"
+    );
     return Array.isArray(saved) ? saved : [];
   } catch {
     return [];
   }
 }
 
-function saveStoredReadNotifications(ids) {
-  localStorage.setItem(READ_NOTIFICATIONS_KEY, JSON.stringify(ids));
+function saveStoredReadNotifications(userId, ids) {
+  localStorage.setItem(getReadNotificationsKey(userId), JSON.stringify(ids));
 }
 
 function formatDateBR(dateString) {
@@ -28,36 +32,44 @@ function formatDateBR(dateString) {
   return date.toLocaleString("pt-BR");
 }
 
+function normalizeResponse(payload) {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.data)) return payload.data;
+  return [];
+}
+
 function buildWorkoutNotifications(items, readNotifications) {
   return items.map((item) => {
-    const id = `workout-${item.workout_feedback_id ?? item.id}`;
+    const id = item.id ?? `workout-${item.workout_feedback_id ?? item.workout_feedbackId ?? item.seq ?? Math.random()}`;
 
     return {
       id,
-      type: "workout",
-      title: "Novo feedback de treino",
-      message: `O paciente ${
-        item.patient_name ?? "Paciente"
-      } enviou um novo feedback de treino.`,
-      created_at: item.created_at,
-      read: readNotifications.includes(id),
+      type: item.type ?? "workout",
+      title: item.title ?? "Novo feedback de treino",
+      message:
+        item.message ||
+        `${item.patient_name ?? "Paciente"} enviou um feedback de treino.`,
+      comment: item.comment ?? "",
+      created_at: item.created_at ?? null,
+      read: item.read ?? readNotifications.includes(id),
     };
   });
 }
 
 function buildDietNotifications(items, readNotifications) {
   return items.map((item) => {
-    const id = `diet-${item.diet_feedback_id ?? item.id}`;
+    const id = item.id ?? `diet-${item.diet_feedback_id ?? item.diet_feedbackId ?? Math.random()}`;
 
     return {
       id,
-      type: "diet",
-      title: "Novo feedback de dieta",
-      message: `O paciente ${
-        item.patient_name ?? "Paciente"
-      } enviou um novo feedback de dieta.`,
-      created_at: item.created_at,
-      read: readNotifications.includes(id),
+      type: item.type ?? "diet",
+      title: item.title ?? "Novo feedback de dieta",
+      message:
+        item.message ||
+        `${item.patient_name ?? "Paciente"} enviou um feedback de dieta.`,
+      comment: item.comment ?? "",
+      created_at: item.created_at ?? null,
+      read: item.read ?? readNotifications.includes(id),
     };
   });
 }
@@ -79,6 +91,8 @@ export default function Topbar() {
   }, [notifications]);
 
   const fetchNotifications = useCallback(async () => {
+    if (!user?.id) return;
+
     try {
       setLoadingNotifications(true);
 
@@ -89,15 +103,15 @@ export default function Topbar() {
 
       const workoutItems =
         workoutResult.status === "fulfilled"
-          ? workoutResult.value.data?.data ?? []
+          ? normalizeResponse(workoutResult.value.data)
           : [];
 
       const dietItems =
         dietResult.status === "fulfilled"
-          ? dietResult.value.data?.data ?? []
+          ? normalizeResponse(dietResult.value.data)
           : [];
 
-      const readNotifications = getStoredReadNotifications();
+      const readNotifications = getStoredReadNotifications(user.id);
 
       const formattedWorkout = buildWorkoutNotifications(
         workoutItems,
@@ -110,7 +124,11 @@ export default function Topbar() {
       );
 
       const allNotifications = [...formattedWorkout, ...formattedDiet].sort(
-        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+        (a, b) => {
+          const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+          const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+          return dateB - dateA;
+        }
       );
 
       setNotifications(allNotifications);
@@ -120,19 +138,23 @@ export default function Topbar() {
     } finally {
       setLoadingNotifications(false);
     }
-  }, []);
+  }, [user?.id]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user?.id) return;
+
     fetchNotifications();
-  }, [user, fetchNotifications]);
+
+    const interval = setInterval(() => {
+      fetchNotifications();
+    }, 15000);
+
+    return () => clearInterval(interval);
+  }, [user?.id, fetchNotifications]);
 
   useEffect(() => {
     function handleClickOutside(event) {
-      if (
-        userMenuRef.current &&
-        !userMenuRef.current.contains(event.target)
-      ) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
         setOpenUserMenu(false);
       }
 
@@ -179,25 +201,27 @@ export default function Topbar() {
   }
 
   function markAsRead(id) {
-    const stored = getStoredReadNotifications();
+    if (!user?.id) return;
+
+    const stored = getStoredReadNotifications(user.id);
 
     if (!stored.includes(id)) {
-      saveStoredReadNotifications([...stored, id]);
+      saveStoredReadNotifications(user.id, [...stored, id]);
     }
 
     setNotifications((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, read: true } : item
-      )
+      prev.map((item) => (item.id === id ? { ...item, read: true } : item))
     );
   }
 
   function markAllAsRead() {
+    if (!user?.id) return;
+
     const ids = notifications.map((item) => item.id);
-    const stored = getStoredReadNotifications();
+    const stored = getStoredReadNotifications(user.id);
     const merged = Array.from(new Set([...stored, ...ids]));
 
-    saveStoredReadNotifications(merged);
+    saveStoredReadNotifications(user.id, merged);
 
     setNotifications((prev) =>
       prev.map((item) => ({ ...item, read: true }))
@@ -254,9 +278,8 @@ export default function Topbar() {
                     key={item.id}
                     type="button"
                     onClick={() => markAsRead(item.id)}
-                    className={`w-full text-left px-4 py-3 border-b border-black/5 transition hover:bg-black/5 ${
-                      !item.read ? "bg-green-50" : "bg-white"
-                    }`}
+                    className={`w-full text-left px-4 py-3 border-b border-black/5 transition hover:bg-black/5 ${!item.read ? "bg-green-50" : "bg-white"
+                      }`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1">
@@ -267,6 +290,12 @@ export default function Topbar() {
                         <p className="text-xs text-gray-600 mt-1">
                           {item.message}
                         </p>
+
+                        {item.comment && (
+                          <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                            {item.comment}
+                          </p>
+                        )}
 
                         <p className="text-[11px] text-gray-400 mt-2">
                           {formatDateBR(item.created_at)}
@@ -296,9 +325,8 @@ export default function Topbar() {
           </span>
 
           <span
-            className={`text-[10px] transition-transform duration-200 ${
-              openUserMenu ? "rotate-180" : ""
-            }`}
+            className={`text-[10px] transition-transform duration-200 ${openUserMenu ? "rotate-180" : ""
+              }`}
           >
             ▼
           </span>
