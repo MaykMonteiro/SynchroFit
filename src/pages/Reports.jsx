@@ -13,13 +13,15 @@ import { api } from "../services/api";
 // data comes from API endpoints: `progress/patients` and `progress/reports`
 
 function ChartCard({ title, data, unit = "" }) {
+  const safeData = Array.isArray(data) ? data : [];
+
   return (
-    <div>
+    <div className="w-full min-w-0">
       <h3 className="mb-2 text-base font-serif">{title}</h3>
 
-      <div className="h-[220px] rounded-md border border-gray-300 bg-white p-4">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} barSize={34}>
+      <div className="w-full min-w-0 overflow-hidden rounded-md border border-gray-300 bg-white p-4">
+        <ResponsiveContainer width="100%" height={220}>
+          <BarChart data={safeData} barSize={34}>
             <CartesianGrid vertical={false} strokeDasharray="3 3" />
             <XAxis dataKey="date" tick={{ fontSize: 12 }} />
             <YAxis tick={{ fontSize: 12 }} />
@@ -37,26 +39,41 @@ export default function Reports() {
   const [selectedPatient, setSelectedPatient] = useState("");
   const [selectedType, setSelectedType] = useState("diet");
   const [reports, setReports] = useState(null);
+  const [loadingPatients, setLoadingPatients] = useState(true);
+  const [loadingReports, setLoadingReports] = useState(false);
 
   useEffect(() => {
     let mounted = true;
-    api
-      .get("/educators/progress/patients")
-      .then((res) => {
+
+    async function fetchPatients() {
+      try {
+        setLoadingPatients(true);
+
+        const res = await api.get("/educators/progress/patients");
         if (!mounted) return;
-        const data = res.data;
-        if (Array.isArray(data) && data.length > 0) {
-          setPatients(data);
+
+        const data = Array.isArray(res.data) ? res.data : [];
+        setPatients(data);
+
+        if (data.length > 0) {
           setSelectedPatient((prev) =>
             prev && data.some((p) => String(p.id) === prev)
               ? prev
               : String(data[0].id)
           );
+        } else {
+          setSelectedPatient("");
         }
-      })
-      .catch(() => {
-        // keep empty patients on error
-      });
+      } catch {
+        if (!mounted) return;
+        setPatients([]);
+        setSelectedPatient("");
+      } finally {
+        if (mounted) setLoadingPatients(false);
+      }
+    }
+
+    fetchPatients();
 
     return () => {
       mounted = false;
@@ -64,19 +81,32 @@ export default function Reports() {
   }, []);
 
   useEffect(() => {
-    if (!selectedPatient) return;
+    if (!selectedPatient) {
+      setReports(null);
+      return;
+    }
+
     let mounted = true;
-    api
-      .get("/educators/progress/reports", {
-        params: { patient_id: selectedPatient, type: selectedType },
-      })
-      .then((res) => {
+
+    async function fetchReports() {
+      try {
+        setLoadingReports(true);
+
+        const res = await api.get("/educators/progress/reports", {
+          params: { patient_id: selectedPatient, type: selectedType },
+        });
+
         if (!mounted) return;
-        setReports(res.data || null);
-      })
-      .catch(() => {
-        setReports(null);
-      });
+        setReports(res.data || {});
+      } catch {
+        if (!mounted) return;
+        setReports({});
+      } finally {
+        if (mounted) setLoadingReports(false);
+      }
+    }
+
+    fetchReports();
 
     return () => {
       mounted = false;
@@ -138,25 +168,25 @@ export default function Reports() {
   }, [selectedData, selectedType]);
 
   return (
-    <div>
+    <div className="w-full min-w-0">
       <h1 className="text-center font-serif text-4xl uppercase tracking-wide mb-4">
         Relatórios
       </h1>
 
-      <div className="bg-sf-panel rounded-md shadow-soft p-6">
-        <div className="grid grid-cols-1 gap-4 mb-6 md:grid-cols-2">
-          <div>
+      <div className="w-full min-w-0 bg-sf-panel rounded-md shadow-soft p-6">
+        <div className="grid grid-cols-1 gap-4 mb-6 md:grid-cols-2 min-w-0">
+          <div className="min-w-0">
             <label className="mb-1 block text-base font-serif">Paciente</label>
             <select
               value={selectedPatient}
               onChange={(e) => setSelectedPatient(e.target.value)}
               className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
-              disabled={patients.length === 0}
+              disabled={loadingPatients || patients.length === 0}
             >
-              {patients.length === 0 ? (
-                <option value="" disabled>
-                  Carregando pacientes...
-                </option>
+              {loadingPatients ? (
+                <option value="">Carregando pacientes...</option>
+              ) : patients.length === 0 ? (
+                <option value="">Nenhum paciente encontrado</option>
               ) : (
                 patients.map((patient) => (
                   <option key={patient.id} value={String(patient.id)}>
@@ -167,7 +197,7 @@ export default function Reports() {
             </select>
           </div>
 
-          <div>
+          <div className="min-w-0">
             <label className="mb-1 block text-base font-serif">Tipo</label>
             <select
               value={selectedType}
@@ -180,16 +210,22 @@ export default function Reports() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {chartConfig.map((chart) => (
-            <ChartCard
-              key={chart.title}
-              title={chart.title}
-              data={chart.data}
-              unit={chart.unit}
-            />
-          ))}
-        </div>
+        {loadingReports ? (
+          <div className="py-10 text-center text-sm text-gray-600">
+            Carregando relatórios...
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 min-w-0 w-full">
+            {chartConfig.map((chart) => (
+              <ChartCard
+                key={chart.title}
+                title={chart.title}
+                data={chart.data}
+                unit={chart.unit}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
