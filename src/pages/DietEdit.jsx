@@ -22,6 +22,7 @@ export default function DietEdit() {
   const [patients, setPatients] = useState([]);
   const [foods, setFoods] = useState([]);
   const [meals, setMeals] = useState([]);
+  const [removedItemIds, setRemovedItemIds] = useState([]);
 
   const [form, setForm] = useState({
     patient_id: "",
@@ -90,15 +91,25 @@ export default function DietEdit() {
         [];
 
       const currentDietItems = Array.isArray(dietItemsData)
-        ? dietItemsData.filter(
-            (dietItem) =>
-              String(dietItem.diet_id ?? dietItem.diet?.id) === String(id)
-          )
+        ? dietItemsData.filter((dietItem) => {
+            const sameDiet =
+              String(dietItem.diet_id ?? dietItem.diet?.id) === String(id);
+
+            const isActive =
+              dietItem.is_active !== false &&
+              dietItem.is_active !== 0 &&
+              dietItem.is_active !== "0";
+
+            const notDeleted = dietItem.deleted_at == null;
+
+            return sameDiet && isActive && notDeleted;
+          })
         : [];
 
       setPatients(Array.isArray(patientsData) ? patientsData : []);
       setFoods(Array.isArray(foodsData) ? foodsData : []);
       setMeals(Array.isArray(mealsData) ? mealsData : []);
+      setRemovedItemIds([]);
 
       setForm({
         patient_id: String(dietData.patient_id ?? ""),
@@ -172,6 +183,16 @@ export default function DietEdit() {
   function removeItem(index) {
     setItems((prev) => {
       if (prev.length === 1) return prev;
+
+      const itemToRemove = prev[index];
+
+      if (itemToRemove?.diet_item_id) {
+        setRemovedItemIds((old) => {
+          if (old.includes(itemToRemove.diet_item_id)) return old;
+          return [...old, itemToRemove.diet_item_id];
+        });
+      }
+
       return prev.filter((_, i) => i !== index);
     });
   }
@@ -274,6 +295,10 @@ export default function DietEdit() {
 
       await api.put(`/educators/diets/${id}`, dietPayload);
 
+      for (const removedId of removedItemIds) {
+        await api.delete(`/educators/diet-items/${removedId}`);
+      }
+
       for (const item of items) {
         const itemPayload = {
           diet_id: Number(id),
@@ -296,6 +321,8 @@ export default function DietEdit() {
           await api.post("/educators/diet-items", itemPayload);
         }
       }
+
+      setRemovedItemIds([]);
 
       alert("Dieta atualizada com sucesso!");
       nav("/dietas");
