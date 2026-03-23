@@ -123,6 +123,14 @@ export default function Anthropometry() {
 
           <button
             type="button"
+            onClick={() => nav(`/antropometria/${anthropometryId}/peso`)}
+            className="border border-blue-600 text-blue-600 px-2 py-[2px] whitespace-nowrap rounded"
+          >
+            Atualizar Peso
+          </button>
+
+          <button
+            type="button"
             onClick={() => handleDelete(item)}
             className="border border-red-600 text-red-600 px-2 py-[2px] rounded"
           >

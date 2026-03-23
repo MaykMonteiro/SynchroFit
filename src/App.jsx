@@ -25,6 +25,7 @@ import WorkoutEdit from "./pages/WorkoutEdit.jsx";
 import DietCreate from "./pages/DietCreate.jsx";
 import DietEdit from "./pages/DietEdit.jsx";
 import AnthropometryEdit from "./pages/AnthropometryEdit.jsx";
+import AnthropometryWeightUpdate from "./pages/AnthropometryWeightUpdate.jsx";
 
 function PrivateRoute({ children }) {
   const { user } = useAuth();
@@ -65,6 +66,7 @@ export default function App() {
         <Route path="/antropometria/cadastro" element={<AnthropometryCreate />} />
         <Route path="/antropometria" element={<Anthropometry />} />
         <Route path="/antropometria/:id/editar" element={<AnthropometryEdit />} />
+        <Route path="/antropometria/:id/peso" element={<AnthropometryWeightUpdate />} />
         <Route path="/settings" element={<Settings />} />
       </Route>
 
