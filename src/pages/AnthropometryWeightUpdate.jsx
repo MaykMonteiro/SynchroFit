@@ -46,6 +46,13 @@ export default function AnthropometryWeightUpdate() {
     }));
   }
 
+  function normalizeDecimalInput(value) {
+    return String(value ?? "")
+      .replace(",", ".")
+      .replace(/[^\d.]/g, "")
+      .replace(/(\..*)\./g, "$1");
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -79,69 +86,83 @@ export default function AnthropometryWeightUpdate() {
     }
   }
 
+  function handleCancel() {
+    nav("/antropometria");
+  }
+
   if (loadingPage) {
     return <div className="text-[12px]">Carregando...</div>;
   }
 
   return (
     <div>
-      <h1 className="text-center font-serif text-4xl uppercase tracking-wide mb-6">
-        Atualizar peso
+      <h1 className="text-center font-serif text-4xl uppercase tracking-wide mb-4">
+        Atualizar Peso
       </h1>
 
-      <section className="bg-sf-panel rounded-md shadow-soft p-8 max-w-3xl mx-auto">
-        <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="bg-sf-panel rounded-md shadow-soft p-6">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-[16px] mb-2">Paciente</label>
+            <label className="mb-1 block text-base font-serif">Paciente</label>
             <input
               type="text"
               value={patientName}
               disabled
-              className="w-full border rounded px-3 py-2 bg-gray-100"
+              className="w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-sm outline-none"
             />
           </div>
 
-          <div>
-            <label className="block text-[16px] mb-2">Novo peso</label>
-            <input
-              type="number"
-              step="0.01"
-              value={form.weight}
-              onChange={(e) => setField("weight", e.target.value)}
-              className="w-full border rounded px-3 py-2"
-              placeholder="Digite o peso"
-            />
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-base font-serif">
+                Novo Peso
+              </label>
+              <input
+                type="text"
+                inputMode="decimal"
+                value={form.weight}
+                onChange={(e) =>
+                  setField("weight", normalizeDecimalInput(e.target.value))
+                }
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
+                placeholder="Digite o peso"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-base font-serif">
+                Data da Medição
+              </label>
+              <input
+                type="date"
+                value={form.date}
+                onChange={(e) => setField("date", e.target.value)}
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
+                required
+              />
+            </div>
           </div>
 
-          <div>
-            <label className="block text-[16px] mb-2">Data da medição</label>
-            <input
-              type="date"
-              value={form.date}
-              onChange={(e) => setField("date", e.target.value)}
-              className="w-full border rounded px-3 py-2"
-            />
-          </div>
+          <div className="flex flex-col justify-center gap-3 pt-3 md:flex-row">
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="w-full rounded-xl border border-sf-green text-sf-greenDark px-6 py-2 text-base md:w-80"
+            >
+              Cancelar
+            </button>
 
-          <div className="flex gap-3 pt-2">
             <button
               type="submit"
               disabled={saving}
-              className="bg-sf-greenDark text-white px-6 py-2 rounded-xl"
+              className="w-full rounded-xl bg-sf-greenDark text-white px-6 py-2 text-base hover:bg-sf-green disabled:opacity-60 md:w-80"
             >
               {saving ? "Salvando..." : "Salvar"}
             </button>
-
-            <button
-              type="button"
-              onClick={() => nav("/antropometria")}
-              className="border border-gray-500 text-gray-700 px-6 py-2 rounded-xl"
-            >
-              Voltar
-            </button>
           </div>
         </form>
-      </section>
+      </div>
     </div>
   );
 }

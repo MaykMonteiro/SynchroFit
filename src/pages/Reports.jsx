@@ -7,28 +7,159 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
+  Cell,
 } from "recharts";
 import { api } from "../services/api";
 
 // data comes from API endpoints: `progress/patients` and `progress/reports`
 
+function formatLabelDate(value) {
+  if (!value) return "-";
+
+  const date = new Date(value);
+
+  if (isNaN(date.getTime())) {
+    return String(value);
+  }
+
+  return date.toLocaleDateString("pt-BR");
+}
+
+function formatValue(value, unit = "") {
+  if (value === null || value === undefined || value === "") return "-";
+
+  const numericValue = Number(value);
+
+  if (!Number.isNaN(numericValue)) {
+    return `${numericValue.toLocaleString("pt-BR")} ${unit}`.trim();
+  }
+
+  return `${value} ${unit}`.trim();
+}
+
+function normalizeChartData(data) {
+  if (!Array.isArray(data)) return [];
+
+  return data.map((item, index) => {
+    const rawDate = item?.date ?? item?.created_at ?? item?.updated_at ?? "";
+    const rawValue = item?.value ?? 0;
+    const numericValue = Number(rawValue);
+
+    return {
+      ...item,
+      // chave única para cada barra, evitando conflito quando há datas repetidas
+      chartKey: `${rawDate || "sem-data"}-${index}`,
+      originalDate: rawDate,
+      value: Number.isNaN(numericValue) ? 0 : numericValue,
+      order: index + 1,
+    };
+  });
+}
+
+function CustomTooltip({ active, payload, title, unit }) {
+  if (!active || !payload || !payload.length) return null;
+
+  const data = payload[0]?.payload ?? {};
+  const rawValue = data?.value;
+  const rawDate = data?.originalDate;
+
+  return (
+    <div className="rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-lg">
+      <p className="mb-1 text-xs font-medium uppercase tracking-wide text-gray-500">
+        {title}
+      </p>
+
+      <p className="text-sm text-gray-600">
+        Data:{" "}
+        <span className="font-medium text-gray-900">
+          {formatLabelDate(rawDate)}
+        </span>
+      </p>
+
+      <p className="text-sm text-gray-600">
+        Registro:{" "}
+        <span className="font-medium text-gray-900">
+          #{data?.order ?? "-"}
+        </span>
+      </p>
+
+      <p className="mt-1 text-sm text-gray-600">
+        Valor:{" "}
+        <span className="font-semibold text-sf-greenDark">
+          {formatValue(rawValue, unit)}
+        </span>
+      </p>
+    </div>
+  );
+}
+
 function ChartCard({ title, data, unit = "" }) {
-  const safeData = Array.isArray(data) ? data : [];
+  const safeData = useMemo(() => normalizeChartData(data), [data]);
 
   return (
     <div className="w-full min-w-0">
       <h3 className="mb-2 text-base font-serif">{title}</h3>
 
       <div className="w-full min-w-0 overflow-hidden rounded-md border border-gray-300 bg-white p-4">
-        <ResponsiveContainer width="100%" height={220}>
-          <BarChart data={safeData} barSize={34}>
-            <CartesianGrid vertical={false} strokeDasharray="3 3" />
-            <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-            <YAxis tick={{ fontSize: 12 }} />
-            <Tooltip formatter={(value) => [`${value} ${unit}`.trim(), title]} />
-            <Bar dataKey="value" fill="#d6d6d6" radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
+        {safeData.length === 0 ? (
+          <div className="flex h-[220px] items-center justify-center text-sm text-gray-500">
+            Nenhum dado disponível
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart
+              data={safeData}
+              barSize={34}
+              margin={{ top: 10, right: 10, left: 0, bottom: 5 }}
+            >
+              <CartesianGrid
+                vertical={false}
+                strokeDasharray="3 3"
+                stroke="#d1d5db"
+              />
+
+              <XAxis
+                dataKey="chartKey"
+                tickFormatter={(_, index) =>
+                  formatLabelDate(safeData[index]?.originalDate)
+                }
+                tick={{ fontSize: 11, fill: "#374151" }}
+                axisLine={{ stroke: "#d1d5db" }}
+                tickLine={{ stroke: "#d1d5db" }}
+                interval={0}
+              />
+
+              <YAxis
+                tick={{ fontSize: 11, fill: "#374151" }}
+                axisLine={{ stroke: "#d1d5db" }}
+                tickLine={{ stroke: "#d1d5db" }}
+              />
+
+              <Tooltip
+                cursor={{ fill: "rgba(155, 203, 159, 0.18)" }}
+                content={<CustomTooltip title={title} unit={unit} />}
+              />
+
+              <Bar
+                dataKey="value"
+                radius={[6, 6, 0, 0]}
+                activeBar={{
+                  fill: "#6fa276",
+                  stroke: "#4f7d56",
+                  strokeWidth: 1,
+                }}
+              >
+                {safeData.map((entry, index) => (
+                  <Cell
+                    key={`cell-${title}-${entry.chartKey}-${index}`}
+                    fill="#9BCB9F"
+                    className="transition-all duration-200"
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        )}
       </div>
     </div>
   );
