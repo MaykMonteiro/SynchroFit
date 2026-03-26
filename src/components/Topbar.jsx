@@ -4,24 +4,6 @@ import { Bell } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext.jsx";
 import { api } from "../services/api";
 
-function getReadNotificationsKey(userId) {
-  return `readNotifications_${userId ?? "anonymous"}`;
-}
-
-function getStoredReadNotifications(userId) {
-  try {
-    const saved = JSON.parse(
-      localStorage.getItem(getReadNotificationsKey(userId)) ?? "[]"
-    );
-    return Array.isArray(saved) ? saved : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveStoredReadNotifications(userId, ids) {
-  localStorage.setItem(getReadNotificationsKey(userId), JSON.stringify(ids));
-}
 
 function formatDateBR(dateString) {
   if (!dateString) return "-";
@@ -38,41 +20,6 @@ function normalizeResponse(payload) {
   return [];
 }
 
-function buildWorkoutNotifications(items, readNotifications) {
-  return items.map((item) => {
-    const id = item.id ?? `workout-${item.workout_feedback_id ?? item.workout_feedbackId ?? item.seq ?? Math.random()}`;
-
-    return {
-      id,
-      type: item.type ?? "workout",
-      title: item.title ?? "Novo feedback de treino",
-      message:
-        item.message ||
-        `${item.patient_name ?? "Paciente"} enviou um feedback de treino.`,
-      comment: item.comment ?? "",
-      created_at: item.created_at ?? null,
-      read: item.read ?? readNotifications.includes(id),
-    };
-  });
-}
-
-function buildDietNotifications(items, readNotifications) {
-  return items.map((item) => {
-    const id = item.id ?? `diet-${item.diet_feedback_id ?? item.diet_feedbackId ?? Math.random()}`;
-
-    return {
-      id,
-      type: item.type ?? "diet",
-      title: item.title ?? "Novo feedback de dieta",
-      message:
-        item.message ||
-        `${item.patient_name ?? "Paciente"} enviou um feedback de dieta.`,
-      comment: item.comment ?? "",
-      created_at: item.created_at ?? null,
-      read: item.read ?? readNotifications.includes(id),
-    };
-  });
-}
 
 export default function Topbar() {
   const { user, logout } = useAuth();
@@ -111,19 +58,10 @@ export default function Topbar() {
           ? normalizeResponse(dietResult.value.data)
           : [];
 
-      const readNotifications = getStoredReadNotifications(user.id);
+      const normalizedWorkout = workoutItems.map(item => ({ ...item, read: !!item.read }));
+      const normalizedDiet = dietItems.map(item => ({ ...item, read: !!item.read }));
 
-      const formattedWorkout = buildWorkoutNotifications(
-        workoutItems,
-        readNotifications
-      );
-
-      const formattedDiet = buildDietNotifications(
-        dietItems,
-        readNotifications
-      );
-
-      const allNotifications = [...formattedWorkout, ...formattedDiet].sort(
+      const allNotifications = [...normalizedWorkout, ...normalizedDiet].sort(
         (a, b) => {
           const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
           const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
@@ -200,32 +138,30 @@ export default function Topbar() {
     }
   }
 
-  function markAsRead(id) {
+  async function markAsRead(id) {
     if (!user?.id) return;
 
-    const stored = getStoredReadNotifications(user.id);
-
-    if (!stored.includes(id)) {
-      saveStoredReadNotifications(user.id, [...stored, id]);
+    try {
+      await api.post(`/educators/notifications/${id}/read`);
+      setNotifications((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, read: true } : item))
+      );
+    } catch (error) {
+      console.error("Erro ao marcar notificação como lida:", error);
     }
-
-    setNotifications((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, read: true } : item))
-    );
   }
 
-  function markAllAsRead() {
+  async function markAllAsRead() {
     if (!user?.id) return;
 
-    const ids = notifications.map((item) => item.id);
-    const stored = getStoredReadNotifications(user.id);
-    const merged = Array.from(new Set([...stored, ...ids]));
-
-    saveStoredReadNotifications(user.id, merged);
-
-    setNotifications((prev) =>
-      prev.map((item) => ({ ...item, read: true }))
-    );
+    try {
+      await api.post("/educators/notifications/read");
+      setNotifications((prev) =>
+        prev.map((item) => ({ ...item, read: true }))
+      );
+    } catch (error) {
+      console.error("Erro ao marcar todas notificações como lidas:", error);
+    }
   }
 
   return (
