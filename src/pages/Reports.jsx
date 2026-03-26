@@ -41,14 +41,18 @@ function normalizeChartData(data) {
   if (!Array.isArray(data)) return [];
 
   return data.map((item, index) => {
-    const rawDate = item?.date ?? item?.created_at ?? item?.updated_at ?? "";
+    const rawDate =
+      item?.date ??
+      item?.created_at ??
+      item?.updated_at ??
+      `initial-${index}`; // 👈 fallback
+
     const rawValue = item?.value ?? 0;
     const numericValue = Number(rawValue);
 
     return {
       ...item,
-      // chave única para cada barra, evitando conflito quando há datas repetidas
-      chartKey: `${rawDate || "sem-data"}-${index}`,
+      chartKey: `${rawDate}-${index}`,
       originalDate: rawDate,
       value: Number.isNaN(numericValue) ? 0 : numericValue,
       order: index + 1,
@@ -170,6 +174,7 @@ export default function Reports() {
   const [selectedPatient, setSelectedPatient] = useState("");
   const [selectedType, setSelectedType] = useState("diet");
   const [reports, setReports] = useState(null);
+  const [anthropometry, setAnthropometry] = useState([]);
   const [loadingPatients, setLoadingPatients] = useState(true);
   const [loadingReports, setLoadingReports] = useState(false);
 
@@ -244,16 +249,96 @@ export default function Reports() {
     };
   }, [selectedPatient, selectedType]);
 
+  useEffect(() => {
+    if (!selectedPatient) {
+      setAnthropometry([]);
+      return;
+    }
+
+    let mounted = true;
+
+    async function fetchAnthropometry() {
+      try {
+        const res = await api.get("/educators/anthropometrys", {
+          params: { patient_id: selectedPatient },
+        });
+
+        if (!mounted) return;
+
+        const anthropometryList = Array.isArray(res.data?.data)
+          ? res.data.data
+          : Array.isArray(res.data)
+          ? res.data
+          : [];
+
+        setAnthropometry(
+          anthropometryList.filter(
+            (item) =>
+              String(
+                item?.patient_id ??
+                  item?.patient?.id ??
+                  item?.id_patient ??
+                  ""
+              ) === String(selectedPatient)
+          )
+        );
+      } catch {
+        if (!mounted) return;
+        setAnthropometry([]);
+      }
+    }
+
+    fetchAnthropometry();
+
+    return () => {
+      mounted = false;
+    };
+  }, [selectedPatient]);
+
   const selectedData = useMemo(() => {
     return reports ?? {};
   }, [reports]);
+
+  const weightWithInitial = useMemo(() => {
+    const weightHistory = Array.isArray(selectedData.weight)
+      ? selectedData.weight
+      : [];
+
+    const initialAnthropometry = Array.isArray(anthropometry)
+      ? anthropometry.find(
+          (item) =>
+            String(
+              item?.patient_id ?? item?.patient?.id ?? item?.id_patient ?? ""
+            ) === String(selectedPatient) &&
+            item?.weights_initial !== null &&
+            item?.weights_initial !== undefined &&
+            item?.weights_initial !== ""
+        )
+      : null;
+
+    if (!initialAnthropometry) {
+      return weightHistory;
+    }
+
+    return [
+      {
+        date:
+          initialAnthropometry.date ??
+          initialAnthropometry.created_at ??
+          initialAnthropometry.updated_at ??
+          null,
+        value: initialAnthropometry.weights_initial,
+      },
+      ...weightHistory,
+    ];
+  }, [anthropometry, selectedData.weight, selectedPatient]);
 
   const chartConfig = useMemo(() => {
     if (selectedType === "diet") {
       return [
         {
           title: "Peso",
-          data: selectedData.weight ?? [],
+          data: weightWithInitial,
           unit: "kg",
         },
         {
@@ -277,7 +362,7 @@ export default function Reports() {
     return [
       {
         title: "Peso",
-        data: selectedData.weight ?? [],
+        data: weightWithInitial,
         unit: "kg",
       },
       {
@@ -296,7 +381,7 @@ export default function Reports() {
         unit: "%",
       },
     ];
-  }, [selectedData, selectedType]);
+  }, [selectedData, selectedType, weightWithInitial]);
 
   return (
     <div className="w-full min-w-0">
