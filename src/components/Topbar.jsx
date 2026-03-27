@@ -4,7 +4,6 @@ import { Bell } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext.jsx";
 import { api } from "../services/api";
 
-
 function formatDateBR(dateString) {
   if (!dateString) return "-";
 
@@ -17,9 +16,9 @@ function formatDateBR(dateString) {
 function normalizeResponse(payload) {
   if (Array.isArray(payload)) return payload;
   if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.notifications)) return payload.notifications;
   return [];
 }
-
 
 export default function Topbar() {
   const { user, logout } = useAuth();
@@ -43,33 +42,21 @@ export default function Topbar() {
     try {
       setLoadingNotifications(true);
 
-      const [workoutResult, dietResult] = await Promise.allSettled([
-        api.get("/educators/notifications/workout-feedback"),
-        api.get("/educators/notifications/diet-feedback"),
-      ]);
+      const response = await api.get("/educators/notifications");
+      const items = normalizeResponse(response.data);
 
-      const workoutItems =
-        workoutResult.status === "fulfilled"
-          ? normalizeResponse(workoutResult.value.data)
-          : [];
-
-      const dietItems =
-        dietResult.status === "fulfilled"
-          ? normalizeResponse(dietResult.value.data)
-          : [];
-
-      const normalizedWorkout = workoutItems.map(item => ({ ...item, read: !!item.read }));
-      const normalizedDiet = dietItems.map(item => ({ ...item, read: !!item.read }));
-
-      const allNotifications = [...normalizedWorkout, ...normalizedDiet].sort(
-        (a, b) => {
+      const normalizedNotifications = items
+        .map((item) => ({
+          ...item,
+          read: Number(item.read) === 1,
+        }))
+        .sort((a, b) => {
           const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
           const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
           return dateB - dateA;
-        }
-      );
+        });
 
-      setNotifications(allNotifications);
+      setNotifications(normalizedNotifications);
     } catch (error) {
       console.error("Erro ao buscar notificações:", error);
       setNotifications([]);
@@ -138,13 +125,18 @@ export default function Topbar() {
     }
   }
 
-  async function markAsRead(id) {
+  async function markAsRead(notification) {
     if (!user?.id) return;
 
     try {
-      await api.post(`/educators/notifications/${id}/read`);
+      await api.post(`/educators/notifications/${notification.id}/read`);
+
       setNotifications((prev) =>
-        prev.map((item) => (item.id === id ? { ...item, read: true } : item))
+        prev.map((item) =>
+          item.id === notification.id
+            ? { ...item, read: true }
+            : item
+        )
       );
     } catch (error) {
       console.error("Erro ao marcar notificação como lida:", error);
@@ -155,7 +147,8 @@ export default function Topbar() {
     if (!user?.id) return;
 
     try {
-      await api.post("/educators/notifications/read");
+      await api.post("/educators/notifications/read", { all: true });
+
       setNotifications((prev) =>
         prev.map((item) => ({ ...item, read: true }))
       );
@@ -213,7 +206,7 @@ export default function Topbar() {
                   <button
                     key={item.id}
                     type="button"
-                    onClick={() => markAsRead(item.id)}
+                    onClick={() => markAsRead(item)}
                     className={`w-full text-left px-4 py-3 border-b border-black/5 transition hover:bg-black/5 ${!item.read ? "bg-green-50" : "bg-white"
                       }`}
                   >
