@@ -2,6 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { api } from "../services/api";
 
+function normalizeSendNotification(value) {
+  return value === true || value === 1 || value === "1" || value === "true";
+}
+
 const EMPTY_ITEM = {
   diet_item_id: null,
   meals_id: "",
@@ -10,6 +14,7 @@ const EMPTY_ITEM = {
   quantity: "",
   measure: "gr",
   others: "",
+  send_notification: false,
 };
 
 export default function DietEdit() {
@@ -141,6 +146,9 @@ export default function DietEdit() {
             quantity: dietItem.quantity ?? "",
             measure: dietItem.measure ?? "gr",
             others: dietItem.others ?? "",
+            send_notification: normalizeSendNotification(
+              dietItem.send_notification
+            ),
           }))
         );
       } else {
@@ -308,7 +316,9 @@ export default function DietEdit() {
           quantity: Number(item.quantity),
           measure: item.measure,
           others: item.others || null,
-          send_notification: false,
+          send_notification: normalizeSendNotification(item.send_notification)
+            ? 1
+            : 0,
           is_active: true,
         };
 
@@ -595,6 +605,24 @@ export default function DietEdit() {
                     className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none"
                     placeholder="Outro"
                   />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="text-base font-serif">
+                    <input
+                      type="checkbox"
+                      checked={item.send_notification}
+                      onChange={(e) =>
+                        setItemField(
+                          index,
+                          "send_notification",
+                          e.target.checked
+                        )
+                      }
+                      className="mr-2 h-4 w-4"
+                    />
+                    Enviar notificação ao paciente
+                  </label>
                 </div>
               </div>
 
