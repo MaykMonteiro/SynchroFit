@@ -105,89 +105,89 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen bg-[#d9d9d9] flex">
-      <aside className="w-[255px] bg-[#d9d9d9] flex items-start justify-center pt-8">
-        <h1 className="text-white text-4xl font-serif tracking-wide">
+    <div className="flex min-h-screen w-full flex-col bg-[#D8D8D8] lg:flex-row">
+      <aside className="w-full bg-[#D8D8D8] px-6 py-8 lg:min-h-screen lg:w-[16.666%] lg:px-8 lg:pt-10">
+        <h1 className="font-serif text-3xl tracking-[0.18em] text-white sm:text-4xl">
           SYNCHRO FIT
         </h1>
       </aside>
 
-      <main className="flex-1 bg-[#63b874] flex justify-center">
-        <div className="w-full max-w-4xl px-10 py-10 flex flex-col">
-          <h2 className="text-center text-white text-5xl font-serif mb-12">
+      <main className="flex w-full flex-1 bg-[#28A745B3] px-5 py-8 sm:px-8 md:px-10 lg:min-h-screen lg:w-[66.666%] lg:px-10 lg:py-12 xl:px-14">
+        <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center">
+          <h2 className="mb-10 text-center font-serif text-4xl tracking-[0.2em] text-white sm:mb-12 sm:text-5xl">
             CADASTRO
           </h2>
 
           <form
             onSubmit={handleSubmit}
-            className="flex-1 flex flex-col justify-between"
+            className="flex w-full flex-col gap-10"
           >
-            <div className="space-y-6">
+            <div className="space-y-5 sm:space-y-6">
               <div>
-                <label className="block text-white text-2xl font-serif mb-2">
+                <label className="mb-2 block font-serif text-xl text-white sm:text-2xl">
                   Nome Completo:
                 </label>
                 <input
                   type="text"
                   value={form.name}
                   onChange={(e) => setField("name", e.target.value)}
-                  className="w-full h-12 rounded-md px-4 text-lg bg-[#e9e9e9] outline-none"
+                  className="h-11 w-full rounded-md border border-white/20 bg-white px-4 text-base text-slate-800 outline-none transition focus:border-[#008CFF] focus:ring-2 focus:ring-[#008CFF]/30 sm:h-12 sm:text-lg"
                 />
                 {errors.name && (
-                  <p className="text-red-100 text-sm mt-1">{errors.name}</p>
+                  <p className="mt-1 text-sm text-red-100">{errors.name}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-white text-2xl font-serif mb-2">
+                <label className="mb-2 block font-serif text-xl text-white sm:text-2xl">
                   E-mail:
                 </label>
                 <input
                   type="email"
                   value={form.email}
                   onChange={(e) => setField("email", e.target.value)}
-                  className="w-full h-12 rounded-md px-4 text-lg bg-[#e9e9e9] outline-none"
+                  className="h-11 w-full rounded-md border border-white/20 bg-white px-4 text-base text-slate-800 outline-none transition focus:border-[#008CFF] focus:ring-2 focus:ring-[#008CFF]/30 sm:h-12 sm:text-lg"
                 />
                 {errors.email && (
-                  <p className="text-red-100 text-sm mt-1">{errors.email}</p>
+                  <p className="mt-1 text-sm text-red-100">{errors.email}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-white text-2xl font-serif mb-2">
+                <label className="mb-2 block font-serif text-xl text-white sm:text-2xl">
                   Telefone:
                 </label>
                 <input
                   type="text"
                   value={form.phone}
                   onChange={(e) => setField("phone", e.target.value)}
-                  className="w-full h-12 rounded-md px-4 text-lg bg-[#e9e9e9] outline-none"
+                  className="h-11 w-full rounded-md border border-white/20 bg-white px-4 text-base text-slate-800 outline-none transition focus:border-[#008CFF] focus:ring-2 focus:ring-[#008CFF]/30 sm:h-12 sm:text-lg"
                 />
                 {errors.phone && (
-                  <p className="text-red-100 text-sm mt-1">{errors.phone}</p>
+                  <p className="mt-1 text-sm text-red-100">{errors.phone}</p>
                 )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-8">
                 <div>
-                  <label className="block text-white text-2xl font-serif mb-2">
+                  <label className="mb-2 block font-serif text-xl text-white sm:text-2xl">
                     Senha:
                   </label>
                   <input
                     type="password"
                     value={form.password}
                     onChange={(e) => setField("password", e.target.value)}
-                    className="w-full h-12 rounded-md px-4 text-lg bg-[#e9e9e9] outline-none"
+                    className="h-11 w-full rounded-md border border-white/20 bg-white px-4 text-base text-slate-800 outline-none transition focus:border-[#008CFF] focus:ring-2 focus:ring-[#008CFF]/30 sm:h-12 sm:text-lg"
                   />
                   {errors.password && (
-                    <p className="text-red-100 text-sm mt-1">
+                    <p className="mt-1 text-sm text-red-100">
                       {errors.password}
                     </p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-white text-2xl font-serif mb-2">
+                  <label className="mb-2 block font-serif text-xl text-white sm:text-2xl">
                     Confirmar Senha:
                   </label>
                   <input
@@ -196,10 +196,10 @@ export default function Register() {
                     onChange={(e) =>
                       setField("password_confirmation", e.target.value)
                     }
-                    className="w-full h-12 rounded-md px-4 text-lg bg-[#e9e9e9] outline-none"
+                    className="h-11 w-full rounded-md border border-white/20 bg-white px-4 text-base text-slate-800 outline-none transition focus:border-[#008CFF] focus:ring-2 focus:ring-[#008CFF]/30 sm:h-12 sm:text-lg"
                   />
                   {errors.password_confirmation && (
-                    <p className="text-red-100 text-sm mt-1">
+                    <p className="mt-1 text-sm text-red-100">
                       {errors.password_confirmation}
                     </p>
                   )}
@@ -207,15 +207,15 @@ export default function Register() {
               </div>
 
               {serverError && (
-                <p className="text-red-100 text-base">{serverError}</p>
+                <p className="text-base text-red-100">{serverError}</p>
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mt-16 pb-6">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-8">
               <button
                 type="button"
                 onClick={handleCancel}
-                className="h-12 rounded-md border-2 border-sky-500 text-white text-2xl font-serif hover:bg-sky-500/10 transition"
+                className="h-11 rounded-md border border-[#008CFF] bg-transparent px-6 font-serif text-xl text-white transition hover:bg-[#008CFF]/10 sm:h-12 sm:text-2xl"
               >
                 Cancelar
               </button>
@@ -223,7 +223,7 @@ export default function Register() {
               <button
                 type="submit"
                 disabled={loading}
-                className="h-12 rounded-md bg-[#118df0] text-white text-xl font-serif hover:brightness-110 transition disabled:opacity-70"
+                className="h-11 rounded-md bg-[#008CFF] px-6 font-serif text-xl text-white transition hover:brightness-110 disabled:opacity-70 sm:h-12 sm:text-2xl"
               >
                 {loading ? "Cadastrando..." : "CADASTRAR"}
               </button>
@@ -231,6 +231,8 @@ export default function Register() {
           </form>
         </div>
       </main>
+
+      <aside className="hidden bg-[#D8D8D8] lg:block lg:min-h-screen lg:w-[16.666%]" />
     </div>
   );
 }
