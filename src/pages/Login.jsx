@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext.jsx";
+import { Mail, Lock } from "lucide-react";
 
 export default function Login() {
   const { login, authLoading } = useAuth();
@@ -31,22 +32,36 @@ export default function Login() {
         <form onSubmit={onSubmit} className="p-0 m-0">
           <label className="block">
             <div className="text-lg mb-2">E-mail:</div>
-            <input
-              type="email"
-              className="w-full h-9 rounded px-2 mb-5 text-black text-sm"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
+            <div className="relative flex items-center">
+              <Mail
+                size={16}
+                className="absolute left-2 -translate-y-1/2 text-gray-500"
+              />
+              <input
+                type="email"
+                className="w-full h-9 rounded pl-8 pr-2 mb-5 text-black text-sm"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Digite seu e-mail"
+              />
+            </div>
           </label>
 
           <label className="block">
             <div className="text-lg mb-2">Senha:</div>
-            <input
-              type="password"
-              className="w-full h-9 rounded px-2 mb-8 text-black text-sm"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-            />
+            <div className="relative flex items-center">
+              <Lock
+                size={16}
+                className="absolute left-2 top-1/4 -translate-y-1/2 text-gray-500"
+              />
+              <input
+                type="password"
+                className="w-full h-9 rounded pl-8 pr-2 mb-8 text-black text-sm"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+                placeholder="Digite sua senha"
+              />
+            </div>
           </label>
 
           <button
