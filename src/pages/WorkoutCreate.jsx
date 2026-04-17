@@ -109,8 +109,6 @@ export default function WorkoutCreate() {
       setWorkoutTypes(Array.isArray(workoutTypesData) ? workoutTypesData : []);
       setExercises(Array.isArray(exercisesData) ? exercisesData : []);
     } catch (error) {
-      console.error("Erro ao carregar opções:", error);
-      console.error("Resposta backend:", error.response?.data);
       setPatients([]);
       setWorkoutTypes([]);
       setExercises([]);
@@ -184,7 +182,6 @@ export default function WorkoutCreate() {
         workoutResponse?.data?.workout_id;
 
       if (!workoutId) {
-        console.error("Resposta da criação do treino:", workoutResponse?.data);
         throw new Error("Não foi possível obter o ID do treino criado.");
       }
 
@@ -207,8 +204,6 @@ export default function WorkoutCreate() {
       alert("Treino cadastrado com sucesso!");
       nav("/treinos");
     } catch (error) {
-      console.error("Erro ao cadastrar treino:", error);
-      console.error("Resposta backend:", error.response?.data);
 
       const apiMessage =
         error?.response?.data?.message ||

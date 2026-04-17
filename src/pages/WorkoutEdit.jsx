@@ -137,8 +137,6 @@ export default function WorkoutEdit() {
         setItems([{ ...EMPTY_ITEM }]);
       }
     } catch (error) {
-      console.error("Erro ao carregar treino para edição:", error);
-      console.error("Resposta backend:", error.response?.data);
       alert("Não foi possível carregar os dados do treino.");
       nav("/treinos");
     } finally {
@@ -325,8 +323,6 @@ export default function WorkoutEdit() {
       alert("Treino atualizado com sucesso!");
       nav("/treinos");
     } catch (error) {
-      console.error("Erro ao atualizar treino:", error);
-      console.error("Resposta backend:", error.response?.data);
       alert(
         error?.response?.data?.message ||
           "Não foi possível atualizar o treino."

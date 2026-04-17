@@ -155,8 +155,6 @@ export default function DietEdit() {
         setItems([{ ...EMPTY_ITEM }]);
       }
     } catch (error) {
-      console.error("Erro ao carregar dados da edição da dieta:", error);
-      console.error("Resposta backend:", error.response?.data);
       alert("Não foi possível carregar os dados da dieta.");
       nav("/dietas");
     } finally {
@@ -337,8 +335,6 @@ export default function DietEdit() {
       alert("Dieta atualizada com sucesso!");
       nav("/dietas");
     } catch (error) {
-      console.error("Erro ao atualizar dieta:", error);
-      console.error("Resposta backend:", error.response?.data);
       alert(
         error?.response?.data?.message ||
           "Não foi possível atualizar a dieta."

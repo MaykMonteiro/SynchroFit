@@ -80,8 +80,6 @@ export default function Register() {
       alert("Cadastro realizado com sucesso!");
       navigate("/");
     } catch (error) {
-      console.error("Erro ao cadastrar:", error);
-
       const responseErrors = error.response?.data?.errors;
 
       if (responseErrors) {

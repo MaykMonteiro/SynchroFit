@@ -121,8 +121,6 @@ export default function AnthropometryEdit() {
               : Boolean(data?.is_active),
         });
       } catch (error) {
-        console.error("Erro ao buscar antropometria:", error);
-        console.error("Resposta backend:", error.response?.data);
         alert("Não foi possível carregar os dados da antropometria.");
         nav("/antropometria");
       } finally {
@@ -159,9 +157,6 @@ export default function AnthropometryEdit() {
       alert("Antropometria atualizada com sucesso.");
       nav("/antropometria");
     } catch (error) {
-      console.error("Erro ao salvar antropometria:", error);
-      console.error("Resposta backend:", error.response?.data);
-      console.error("Payload enviado:", payload);
       alert("Não foi possível salvar a antropometria.");
     } finally {
       setSaving(false);

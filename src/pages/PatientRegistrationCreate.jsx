@@ -107,7 +107,6 @@ export default function PatientRegistrationCreate() {
       await api.post("/educators/patient-registrations", payload);
       nav("/pacientes");
     } catch (err) {
-      console.error("Erro ao cadastrar matrícula:", err?.response?.data ?? err);
       setError("Não foi possível cadastrar a matrícula.");
     } finally {
       setSaving(false);

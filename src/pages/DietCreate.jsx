@@ -81,8 +81,6 @@ export default function DietCreate() {
       setFoods(Array.isArray(foodsData) ? foodsData : []);
       setMeals(Array.isArray(mealsData) ? mealsData : []);
     } catch (error) {
-      console.error("Erro ao carregar dados da tela de dieta:", error);
-      console.error("Resposta backend:", error.response?.data);
       alert("Erro ao carregar pacientes, alimentos ou refeições.");
     } finally {
       setLoadingPage(false);
@@ -241,7 +239,6 @@ export default function DietCreate() {
         dietResponse?.data?.diet_id;
 
       if (!dietId) {
-        console.error("Resposta da criação da dieta:", dietResponse?.data);
         throw new Error(
           "A dieta foi enviada, mas a API não retornou o ID da dieta criada."
         );
@@ -268,9 +265,6 @@ export default function DietCreate() {
       alert("Dieta cadastrada com sucesso!");
       nav("/dietas");
     } catch (error) {
-      console.error("Erro ao cadastrar dieta:", error);
-      console.error("Resposta backend:", error.response?.data);
-
       const apiMessage =
         error?.response?.data?.message ||
         error?.message ||

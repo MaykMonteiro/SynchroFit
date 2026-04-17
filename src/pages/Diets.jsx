@@ -51,7 +51,6 @@ export default function Diets() {
 
       setDiets(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error("Erro ao buscar dietas:", error);
       setDiets([]);
     } finally {
       setLoading(false);
@@ -75,7 +74,9 @@ export default function Diets() {
       try {
         await api.delete(`/educators/diets/${dietId}`);
       } catch (err) {
-        console.warn("Não foi possível excluir/finalizar na API:", err);
+        alert(
+          "Não foi possível excluir/finalizar a dieta na API. Ela será ocultada nesta tela, mas pode aparecer novamente caso a API retorne os dados dela em algum momento."
+        );
       }
 
       setHiddenDietIds((prev) => {
@@ -88,7 +89,6 @@ export default function Diets() {
 
       alert("Dieta excluída com sucesso!");
     } catch (error) {
-      console.error("Erro ao ocultar dieta:", error);
       alert("Não foi possível excluir a dieta.");
     }
   }

@@ -80,7 +80,6 @@ export default function PatientEdit() {
       await fetchPatients();
       nav("/pacientes");
     } catch (err) {
-      console.error("Erro ao editar paciente:", err);
       setError("Não foi possível salvar as alterações.");
     } finally {
       setSaving(false);

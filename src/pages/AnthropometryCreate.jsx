@@ -110,8 +110,6 @@ export default function AnthropometryCreate() {
 
       nav("/antropometria");
     } catch (error) {
-      console.error("Erro ao cadastrar antropometria:", error);
-      console.error("Payload enviado:", payload);
       alert("Não foi possível cadastrar a antropometria.");
     } finally {
       setSaving(false);

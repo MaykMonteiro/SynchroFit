@@ -28,7 +28,6 @@ export default function AnthropometryWeightUpdate() {
         setPatientName(data.name ?? "Paciente");
         setPatientId(data.patient_id ?? "");
       } catch (error) {
-        console.error("Erro ao buscar antropometria:", error);
         alert("Não foi possível carregar os dados.");
         nav("/antropometria");
       } finally {
@@ -78,8 +77,6 @@ export default function AnthropometryWeightUpdate() {
       alert("Peso atualizado com sucesso.");
       nav("/antropometria");
     } catch (error) {
-      console.error("Erro ao atualizar peso:", error);
-      console.log("Resposta do backend:", error.response?.data);
       alert("Não foi possível salvar o peso.");
     } finally {
       setSaving(false);

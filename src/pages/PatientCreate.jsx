@@ -44,7 +44,6 @@ export default function PatientCreate() {
 
       nav("/pacientes");
     } catch (error) {
-      console.error("Erro ao cadastrar paciente:", error?.response?.data ?? error);
       alert("Não foi possível cadastrar o paciente.");
     } finally {
       setLoading(false);

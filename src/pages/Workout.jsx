@@ -45,7 +45,6 @@ export default function Workout() {
 
       setWorkouts(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error("Erro ao buscar treinos:", error);
       setWorkouts([]);
     } finally {
       setLoading(false);
@@ -71,7 +70,6 @@ export default function Workout() {
       alert("Treino excluído com sucesso!");
       await fetchWorkouts();
     } catch (error) {
-      console.error("Erro ao excluir treino:", error);
       alert("Não foi possível excluir o treino.");
     }
   }

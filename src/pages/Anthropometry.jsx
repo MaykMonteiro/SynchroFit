@@ -35,7 +35,6 @@ export default function Anthropometry() {
           : []
       );
     } catch (error) {
-      console.error("Erro ao buscar antropometria:", error);
       setAnthropometries([]);
     } finally {
       setLoading(false);

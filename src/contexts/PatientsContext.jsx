@@ -40,7 +40,6 @@ export function PatientsProvider({ children }) {
 
       setPatients(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error("Erro ao buscar pacientes:", error?.response?.data ?? error);
       setPatients([]);
     } finally {
       setLoading(false);
@@ -63,7 +62,6 @@ export function PatientsProvider({ children }) {
       await fetchPatients();
       return response.data;
     } catch (error) {
-      console.error("Erro ao criar paciente:", error?.response?.data ?? error);
       throw error;
     }
   }
@@ -84,7 +82,6 @@ export function PatientsProvider({ children }) {
       await fetchPatients();
       return response.data;
     } catch (error) {
-      console.error("Erro ao atualizar paciente:", error?.response?.data ?? error);
       throw error;
     }
   }
@@ -105,7 +102,6 @@ export function PatientsProvider({ children }) {
       await fetchPatients();
       return response.data;
     } catch (error) {
-      console.error("Erro ao excluir paciente:", error?.response?.data ?? error);
       throw error;
     }
   }

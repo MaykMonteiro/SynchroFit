@@ -31,7 +31,6 @@ export function PatientRegistrationsProvider({ children }) {
         },
       });
 
-      console.debug("DEBUG registrations raw response:", response.data);
 
       const normalized = Array.isArray(response.data?.["Matrículas:"])
         ? response.data["Matrículas:"]
@@ -45,12 +44,10 @@ export function PatientRegistrationsProvider({ children }) {
         const keySet = Array.from(
           new Set(normalized.flatMap((r) => Object.keys(r || {})))
         );
-        console.debug("DEBUG registrations sample keys:", keySet);
       }
 
       setRegistrations(normalized);
     } catch (error) {
-      console.error("Erro ao buscar matrículas:", error?.response?.data ?? error);
       setRegistrations([]);
     } finally {
       setLoading(false);

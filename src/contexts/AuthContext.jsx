@@ -19,7 +19,6 @@ export function AuthProvider({ children }) {
       try {
         setUser(JSON.parse(savedUser));
       } catch (error) {
-        console.error("Erro ao ler usuário salvo:", error);
         localStorage.removeItem("user");
       }
     }
@@ -38,7 +37,6 @@ export function AuthProvider({ children }) {
       const educator = response.data?.educator;
 
       if (!token || !educator) {
-        console.error("Resposta de login inválida:", response.data);
         return false;
       }
 
@@ -50,7 +48,6 @@ export function AuthProvider({ children }) {
 
       return true;
     } catch (error) {
-      console.error("Erro no login:", error?.response?.data ?? error);
       return false;
     } finally {
       setAuthLoading(false);

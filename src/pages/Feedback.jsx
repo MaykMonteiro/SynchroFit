@@ -56,7 +56,6 @@ export default function Feedbacks() {
 
       setFeedbacks(mergedFeedbacks);
     } catch (error) {
-      console.error("Erro ao buscar feedbacks:", error);
       setFeedbacks([]);
     } finally {
       setLoading(false);

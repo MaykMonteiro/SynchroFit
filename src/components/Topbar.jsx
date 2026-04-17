@@ -58,7 +58,6 @@ export default function Topbar() {
 
       setNotifications(normalizedNotifications);
     } catch (error) {
-      console.error("Erro ao buscar notificações:", error);
       setNotifications([]);
     } finally {
       setLoadingNotifications(false);
@@ -139,7 +138,7 @@ export default function Topbar() {
         )
       );
     } catch (error) {
-      console.error("Erro ao marcar notificação como lida:", error);
+      alert("Não foi possível marcar a notificação como lida. Tente novamente.");
     }
   }
 
@@ -153,7 +152,7 @@ export default function Topbar() {
         prev.map((item) => ({ ...item, read: true }))
       );
     } catch (error) {
-      console.error("Erro ao marcar todas notificações como lidas:", error);
+      alert("Não foi possível marcar todas as notificações como lidas. Tente novamente.");
     }
   }
 

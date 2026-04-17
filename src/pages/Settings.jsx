@@ -49,7 +49,6 @@ export default function Settings() {
 
       alert("Configurações atualizadas com sucesso.");
     } catch (error) {
-      console.error("Erro ao atualizar configurações:", error);
       alert("Não foi possível atualizar as configurações.");
     } finally {
       setSaving(false);
