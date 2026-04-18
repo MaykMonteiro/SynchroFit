@@ -31,16 +31,16 @@ export default function Diets() {
     fetchPatients();
   }, []);
 
-  useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem("hiddenDiets") ?? "[]");
-      if (Array.isArray(saved)) {
-        setHiddenDietIds(saved.map((id) => String(id)));
-      }
-    } catch {
-      setHiddenDietIds([]);
-    }
-  }, []);
+  // useEffect(() => {
+  //   try {
+  //     const saved = JSON.parse(localStorage.getItem("hiddenDiets") ?? "[]");
+  //     if (Array.isArray(saved)) {
+  //       setHiddenDietIds(saved.map((id) => String(id)));
+  //     }
+  //   } catch {
+  //     setHiddenDietIds([]);
+  //   }
+  // }, []);
 
   async function fetchDiets() {
     try {
@@ -79,13 +79,13 @@ export default function Diets() {
         );
       }
 
-      setHiddenDietIds((prev) => {
-        if (prev.includes(dietId)) return prev;
+      // setHiddenDietIds((prev) => {
+      //   if (prev.includes(dietId)) return prev;
 
-        const next = [...prev, dietId];
-        localStorage.setItem("hiddenDiets", JSON.stringify(next));
-        return next;
-      });
+      //   const next = [...prev, dietId];
+      //   localStorage.setItem("hiddenDiets", JSON.stringify(next));
+      //   return next;
+      // });
 
       alert("Dieta excluída com sucesso!");
     } catch (error) {
