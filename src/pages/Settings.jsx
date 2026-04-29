@@ -55,7 +55,6 @@ export default function Settings() {
 
       const updatedUser = response.data?.educator || response.data;
       setUser(updatedUser);
-      localStorage.setItem("user", JSON.stringify(updatedUser));
 
       alert("Configurações atualizadas com sucesso.");
 
