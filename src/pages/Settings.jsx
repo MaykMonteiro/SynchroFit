@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { api } from "../services/api";
 
 export default function Settings() {
   const nav = useNavigate();
-  const { user, setUser } = useAuth();
+  const { user, setUser, logout } = useAuth();
 
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
@@ -38,16 +39,30 @@ export default function Settings() {
     try {
       setSaving(true);
 
-      const updatedUser = {
-        ...user,
+      const payload = {
         name: form.name.trim(),
         email: form.email.trim(),
         phone: form.phone.trim(),
       };
 
+      const passwordChanged = form.password.trim().length > 0;
+
+      if (passwordChanged) {
+        payload.password = form.password.trim();
+      }
+
+      const response = await api.put(`/educators/educators/${user.id}`, payload);
+
+      const updatedUser = response.data?.educator || response.data;
       setUser(updatedUser);
+      localStorage.setItem("user", JSON.stringify(updatedUser));
 
       alert("Configurações atualizadas com sucesso.");
+
+      if (passwordChanged) {
+        logout();
+        nav("/login");
+      }
     } catch (error) {
       alert("Não foi possível atualizar as configurações.");
     } finally {
